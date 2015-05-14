@@ -53,20 +53,19 @@ public class PreviewMakersFactory {
 
 	public static IPreviewMaker getPreviewMaker(String mimeType,
 			String resourceId, String previewsRepoPath, String entryPoint,
-			boolean isRemote, String realPath, String previewUri,
-			ServletContext context) {
+			boolean isRemote, String previewUri, ServletContext context) {
 		if (logger == null)
 			createLogger();
 		logger.info("Askin preview maker for mime type : " + mimeType);
 		if (isRemote)
 			return new RemoteResourcePreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		if (StringUtils.equals(mimeType, "application/x-uniboard+zip"))
 			return new UniboardPreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		if (StringUtils.equals(mimeType, "application/x-shockwave-flash"))
 			return new FlashPreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		if (StringUtils.equals(mimeType, "image/jpeg")
 				|| StringUtils.equals(mimeType, "image/png")
 				|| StringUtils.equals(mimeType, "image/gif")
@@ -74,27 +73,27 @@ public class PreviewMakersFactory {
 				|| StringUtils.equals(mimeType, "image/tiff")
 				|| StringUtils.equals(mimeType, "image/svg"))
 			return new ImagePreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		if (MimeTypeGroups.PDF.list().contains(mimeType))
 			return new PDFPreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		if (MimeTypeGroups.OFFICE_DOCUMENTS.list().contains(mimeType))
 			return new MsDocumentPreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		if (MimeTypeGroups.EPUB.list().contains(mimeType))
 			if (StringUtils.equals(ResourceApi.getProperty(
 					ParametersKeys.epubPreviewQuality, context), "low"))
 				return new EpubJPegPreviewMaker(resourceId, previewsRepoPath,
-						entryPoint, realPath, previewUri);
+						entryPoint, previewUri);
 			else
 				return new EpubMonoclePreviewMaker(resourceId,
-						previewsRepoPath, entryPoint, realPath, previewUri);
+						previewsRepoPath, entryPoint, previewUri);
 		if (MimeTypeGroups.VIDEOS.list().contains(mimeType))
 			return new VideoPreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, realPath, previewUri);
+					entryPoint, previewUri);
 		logger.warn("No preview maker found for mime type :" + mimeType);
 		return new UntypedPreviewMaker(resourceId, previewsRepoPath,
-				entryPoint, realPath, previewUri);
+				entryPoint, previewUri);
 	}
 
 }

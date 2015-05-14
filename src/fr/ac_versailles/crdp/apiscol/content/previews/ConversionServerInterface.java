@@ -30,14 +30,12 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import fr.ac_versailles.crdp.apiscol.ParametersKeys;
 import fr.ac_versailles.crdp.apiscol.UsedNamespaces;
 import fr.ac_versailles.crdp.apiscol.content.ResourceApi;
-import fr.ac_versailles.crdp.apiscol.content.filters.ClientSecurityFilter;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 public class ConversionServerInterface {
 
 	private static Logger logger;
 	private static Client client;
-	private static String conversionWsSharedSecret;
 	private static WebResource conversionWebServiceResource;
 	private static boolean initialized = false;
 
@@ -60,12 +58,12 @@ public class ConversionServerInterface {
 					.entity(form).post(ClientResponse.class);
 		} catch (UniformInterfaceException e2) {
 			logger.error("Request to previews web service was aborted for file"
-					+ filePath);
+					+ filePath + " with message " + e2.getMessage());
 			e2.printStackTrace();
 			return null;
 		} catch (ClientHandlerException e2) {
 			logger.error("Request to previews web service was aborted for file"
-					+ filePath);
+					+ filePath + " with message " + e2.getMessage());
 			e2.printStackTrace();
 			return null;
 		}
@@ -197,8 +195,6 @@ public class ConversionServerInterface {
 		createLogger();
 		client = Client.create();
 
-		conversionWsSharedSecret = ResourceApi.getProperty(
-				ParametersKeys.conversionWsSharedSecret, context);
 		URI conversionWebserviceUrl = null;
 		try {
 			conversionWebserviceUrl = new URI(ResourceApi.getProperty(
@@ -210,11 +206,6 @@ public class ConversionServerInterface {
 
 		conversionWebServiceResource = client.resource(UriBuilder.fromUri(
 				conversionWebserviceUrl).build());
-		ClientSecurityFilter securityFilter = new ClientSecurityFilter();
-		securityFilter.addKey(conversionWebserviceUrl.toString(),
-				conversionWsSharedSecret);
-
-		conversionWebServiceResource.addFilter(securityFilter);
 		initialized = true;
 
 	}

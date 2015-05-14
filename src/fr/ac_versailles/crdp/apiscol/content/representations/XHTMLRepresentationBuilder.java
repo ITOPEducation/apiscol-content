@@ -1,6 +1,7 @@
 package fr.ac_versailles.crdp.apiscol.content.representations;
 
 import java.awt.Point;
+import java.io.InputStream;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -10,6 +11,7 @@ import org.w3c.dom.Document;
 
 import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
+import fr.ac_versailles.crdp.apiscol.content.resources.ResourcesLoader;
 import fr.ac_versailles.crdp.apiscol.content.searchEngine.ISearchEngineResultHandler;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
@@ -32,35 +34,46 @@ public class XHTMLRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceRepresentation(String realPath, UriInfo uriInfo,
+	public String getResourceRepresentation(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException {
+		InputStream xslStream = ResourcesLoader
+				.loadResource("xsl/resourceXMLToHTMLTransformer.xsl");
+		if (xslStream == null) {
+			logger.error("Impossible de charger la feuille de transformation xsl");
+		}
 		return HTMLUtils.WrapInHTML5Headers((Document) XMLUtils.xsltTransform(
-				realPath + "/xsl/resourceXMLToHTMLTransformer.xsl",
-				innerBuilder.getResourceRepresentation(realPath, uriInfo,
+				xslStream, innerBuilder.getResourceRepresentation(uriInfo,
 						apiscolInstanceName, resourceId, editUri)));
 	}
 
 	@Override
-	public String getCompleteResourceListRepresentation(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, int start, int rows,
-			String editUri) throws DBAccessException {
+	public String getCompleteResourceListRepresentation(UriInfo uriInfo,
+			String apiscolInstanceName, int start, int rows, String editUri)
+			throws Exception {
+		InputStream xslStream = ResourcesLoader
+				.loadResource("xsl/resourcesListXMLToHTMLTransformer.xsl");
+		if (xslStream == null) {
+			logger.error("Impossible de charger la feuille de transformation xsl");
+		}
 		return HTMLUtils.WrapInHTML5Headers((Document) XMLUtils.xsltTransform(
-				realPath + "/xsl/resourcesListXMLToHTMLTransformer.xsl",
-				(Document) innerBuilder.getCompleteResourceListRepresentation(
-						realPath, uriInfo, apiscolInstanceName, start, rows,
-						editUri)));
+				xslStream, (Document) innerBuilder
+						.getCompleteResourceListRepresentation(uriInfo,
+								apiscolInstanceName, start, rows, editUri)));
 	}
 
 	@Override
-	public String selectResourceFollowingCriterium(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName,
-			ISearchEngineResultHandler handler, int start, int rows,
-			String editUri) throws DBAccessException {
+	public String selectResourceFollowingCriterium(UriInfo uriInfo,
+			String apiscolInstanceName, ISearchEngineResultHandler handler,
+			int start, int rows, String editUri) throws DBAccessException {
+		InputStream xslStream = ResourcesLoader
+				.loadResource("xsl/resourcesListXMLToHTMLTransformer.xsl");
+		if (xslStream == null) {
+			logger.error("Impossible de charger la feuille de transformation xsl");
+		}
 		return HTMLUtils.WrapInHTML5Headers((Document) XMLUtils.xsltTransform(
-				realPath + "/xsl/resourcesListXMLToHTMLTransformer.xsl",
-				innerBuilder.selectResourceFollowingCriterium(realPath,
+				xslStream, innerBuilder.selectResourceFollowingCriterium(
 						uriInfo, apiscolInstanceName, handler, start, rows,
 						editUri)));
 	}
@@ -71,49 +84,44 @@ public class XHTMLRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceStringRepresentation(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String editUri) throws DBAccessException,
-			InexistentResourceInDatabaseException,
+	public String getResourceStringRepresentation(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String editUri)
+			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException {
 		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getFileSuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String fileName) {
+	public String getFileSuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String fileName) {
 		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getInexistentFileDestructionAttemptReport(String realPath,
-			UriInfo uriInfo, String resourceId, String fileName) {
+	public String getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+			String resourceId, String fileName) {
 		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getResourceSuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings) {
+	public String getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings) {
 		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getResourceUnsuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings) {
+	public String getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings) {
 		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getSuccessfullOptimizationReport(String realPath,
-			UriInfo uriInfo) {
+	public String getSuccessfullOptimizationReport(UriInfo uriInfo) {
 		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
@@ -134,8 +142,8 @@ public class XHTMLRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceTechnicalInformations(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId)
+	public String getResourceTechnicalInformations(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId)
 			throws ResourceDirectoryNotFoundException, DBAccessException,
 			InexistentResourceInDatabaseException {
 		// TODO Auto-generated method stub

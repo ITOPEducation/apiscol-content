@@ -1,8 +1,6 @@
 package fr.ac_versailles.crdp.apiscol.content.thumbs;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

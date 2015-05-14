@@ -85,7 +85,7 @@ import fr.ac_versailles.crdp.apiscol.utils.TimeUtils;
 public class ResourceApi extends ApiscolApi {
 
 	private static String apiscolInstanceName;
-	private static String previewsRepoPath;   
+	private static String previewsRepoPath;
 	private static ExecutorService compressionExecutor;
 	private static ExecutorService searchEngineRequestExecutor;
 	private static ExecutorService previewMakerExecutor;
@@ -112,7 +112,7 @@ public class ResourceApi extends ApiscolApi {
 		}
 	}
 
-	private void createSearchEngineQueryHandler() {  
+	private void createSearchEngineQueryHandler() {
 		String solrAddress = ResourceApi.getProperty(
 				ParametersKeys.solrAddress, context);
 		String solrSearchPath = ResourceApi.getProperty(
@@ -227,11 +227,12 @@ public class ResourceApi extends ApiscolApi {
 				.getRepresentationBuilder(requestedFormat, context);
 		IResourceDataHandler resourceDataHandler = DBAccessFactory
 				.getResourceDataHandler(DBTypes.mongoDB);
-		Object response = rb.getResourceTechnicalInformations(
-				realPath(context), uriInfo, apiscolInstanceName, resourceId);
+		Object response = rb.getResourceTechnicalInformations(uriInfo,
+				apiscolInstanceName, resourceId);
 
 		return Response
 				.ok(response, rb.getMediaType())
+
 				.header(HttpHeaders.ETAG,
 						getEtatInRFC3339(resourceId, resourceDataHandler))
 				.build();
@@ -245,12 +246,13 @@ public class ResourceApi extends ApiscolApi {
 			UnknownMediaTypeForResponseException {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
-		Object response = rb.getResourceRepresentation(realPath(context),
-				uriInfo, apiscolInstanceName, resourceId.toString(),
-				ResourceApi.editUri);
+		Object response = rb
+				.getResourceRepresentation(uriInfo, apiscolInstanceName,
+						resourceId.toString(), ResourceApi.editUri);
 
 		return Response
 				.ok(response, rb.getMediaType())
+				.header("Access-Control-Allow-Origin", "*")
 				.header(HttpHeaders.ETAG,
 						getEtatInRFC3339(resourceId, resourceDataHandler))
 				.build();
@@ -285,11 +287,7 @@ public class ResourceApi extends ApiscolApi {
 	 * @param uriInfo
 	 * @return Resource list representation with hits and text excerpts in case
 	 *         og query with search words
-	 * @throws DBAccessException
-	 * @throws SearchEngineErrorException
-	 * @throws InexistentResourceInDatabaseException
-	 * @throws ResourceDirectoryNotFoundException
-	 * @throws UnknownMediaTypeForResponseException
+	 * @throws Exception
 	 */
 
 	@GET
@@ -303,10 +301,7 @@ public class ResourceApi extends ApiscolApi {
 			@DefaultValue("0") @QueryParam(value = "fuzzy") final float fuzzy,
 			@DefaultValue("0") @QueryParam(value = "start") final int start,
 			@DefaultValue("10") @QueryParam(value = "rows") final int rows)
-			throws DBAccessException, SearchEngineErrorException,
-			InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException,
-			UnknownMediaTypeForResponseException {
+			throws Exception {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
@@ -326,14 +321,15 @@ public class ResourceApi extends ApiscolApi {
 					.getResultHandler();
 			handler.parse(result);
 			return Response.ok(
-					rb.selectResourceFollowingCriterium(realPath(context),
-							uriInfo, apiscolInstanceName, handler, start, rows,
+					rb.selectResourceFollowingCriterium(uriInfo,
+							apiscolInstanceName, handler, start, rows,
 							ResourceApi.editUri), rb.getMediaType()).build();
 		}
 		return Response
-				.ok(rb.getCompleteResourceListRepresentation(realPath(context),
-						uriInfo, apiscolInstanceName, start, rows,
-						ResourceApi.editUri), rb.getMediaType())
+				.ok(rb.getCompleteResourceListRepresentation(uriInfo,
+						apiscolInstanceName, start, rows, ResourceApi.editUri),
+						rb.getMediaType())
+				.header("Access-Control-Allow-Origin", "*")
 				.type(rb.getMediaType()).build();
 	}
 
@@ -362,8 +358,8 @@ public class ResourceApi extends ApiscolApi {
 			handler.parse(result);
 			// TODO valeur magique 10
 			return Response.ok(
-					rb.selectResourceFollowingCriterium(realPath(context),
-							uriInfo, apiscolInstanceName, handler, 0, 10,
+					rb.selectResourceFollowingCriterium(uriInfo,
+							apiscolInstanceName, handler, 0, 10,
 							ResourceApi.editUri), rb.getMediaType()).build();
 		}
 	}
@@ -737,8 +733,8 @@ public class ResourceApi extends ApiscolApi {
 					if (versionNumberHasToBeUpdated)
 						resourceDataHandler.updateVersionNumber(resourceId);
 					response = Response.ok(
-							rb.getResourceRepresentation(realPath(context),
-									uriInfo, apiscolInstanceName, resourceId,
+							rb.getResourceRepresentation(uriInfo,
+									apiscolInstanceName, resourceId,
 									ResourceApi.editUri), rb.getMediaType())
 							.header(HttpHeaders.ETAG,
 									getEtatInRFC3339(resourceId,
@@ -856,7 +852,7 @@ public class ResourceApi extends ApiscolApi {
 						RequestHandler.extractAcceptHeader(request), context);
 		Object response;
 		try {
-			response = rb.getResourceRepresentation(realPath(context), uriInfo,
+			response = rb.getResourceRepresentation(uriInfo,
 					apiscolInstanceName, resourceId.toString(),
 					ResourceApi.editUri);
 		} catch (InexistentResourceInDatabaseException e1) {
@@ -1014,9 +1010,9 @@ public class ResourceApi extends ApiscolApi {
 		if (response == null)
 			response = Response
 					.ok(response, rb.getMediaType())
-					.entity(rb.getResourceRepresentation(realPath(context),
-							uriInfo, apiscolInstanceName,
-							resourceId.toString(), ResourceApi.editUri))
+					.entity(rb.getResourceRepresentation(uriInfo,
+							apiscolInstanceName, resourceId.toString(),
+							ResourceApi.editUri))
 					.header(HttpHeaders.ETAG,
 							getEtatInRFC3339(resourceId, resourceDataHandler));
 		return response.build();
@@ -1103,12 +1099,12 @@ public class ResourceApi extends ApiscolApi {
 							resourceId));
 		}
 		if (response == null)
-			response = Response.ok(
-					rb.getResourceRepresentation(realPath(context), uriInfo,
+			response = Response
+					.ok(rb.getResourceRepresentation(uriInfo,
 							apiscolInstanceName, resourceId,
 							ResourceApi.editUri), rb.getMediaType()).header(
-					HttpHeaders.ETAG,
-					getEtatInRFC3339(resourceId, resourceDataHandler));
+							HttpHeaders.ETAG,
+							getEtatInRFC3339(resourceId, resourceDataHandler));
 		return response.build();
 
 	}
@@ -1121,9 +1117,8 @@ public class ResourceApi extends ApiscolApi {
 		Integer identifier = -1;
 		Document manifestFile = (Document) EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(CustomMediaType.SCORM_XML.toString(),
-						context).getResourceRepresentation(realPath(context),
-						uriInfo, apiscolInstanceName, resourceId,
-						ResourceApi.editUri);
+						context).getResourceRepresentation(uriInfo,
+						apiscolInstanceName, resourceId, ResourceApi.editUri);
 		CompressionTask task = null;
 		try {
 			task = new CompressionTask(resourceId, manifestFile);
@@ -1162,8 +1157,7 @@ public class ResourceApi extends ApiscolApi {
 					mainFile);
 		}
 		task = PreviewMakersFactory.getPreviewMaker(mimeType, resourceId,
-				previewsRepoPath, entryPoint, isRemote, realPath(context),
-				previewUri, context);
+				previewsRepoPath, entryPoint, isRemote, previewUri, context);
 		if (task != null) {
 			synchronized (refreshProcessRegistry) {
 				identifier = refreshProcessRegistry.register(task, resourceId);
@@ -1338,12 +1332,12 @@ public class ResourceApi extends ApiscolApi {
 							// rien
 							response = Response.ok(
 									rb.getFileSuccessfulDestructionReport(
-											realPath(context), uriInfo,
-											apiscolInstanceName, resourceId,
-											fileName), rb.getMediaType())
-									.header(HttpHeaders.ETAG,
-											getEtatInRFC3339(resourceId,
-													resourceDataHandler));
+											uriInfo, apiscolInstanceName,
+											resourceId, fileName),
+									rb.getMediaType()).header(
+									HttpHeaders.ETAG,
+									getEtatInRFC3339(resourceId,
+											resourceDataHandler));
 							if (!ResourceDirectoryInterface
 									.resourceHasFiles(resourceId)) {
 								boolean successFullDirectoryDeletion = ResourceDirectoryInterface
@@ -1680,7 +1674,7 @@ public class ResourceApi extends ApiscolApi {
 									.status(Status.NOT_FOUND)
 									.entity(rb
 											.getResourceUnsuccessfulDestructionReport(
-													realPath(context), uriInfo,
+													uriInfo,
 													apiscolInstanceName,
 													resourceId,
 													warnings.toString()));
@@ -1704,11 +1698,11 @@ public class ResourceApi extends ApiscolApi {
 				if (response == null) {
 
 					{
-						response = Response
-								.ok(rb.getResourceSuccessfulDestructionReport(
-										realPath(context), uriInfo,
-										apiscolInstanceName, resourceId,
-										warnings.toString()), rb.getMediaType());
+						response = Response.ok(rb
+								.getResourceSuccessfulDestructionReport(
+										uriInfo, apiscolInstanceName,
+										resourceId, warnings.toString()), rb
+								.getMediaType());
 						deleteResourceDownloadableArchive(resourceId);
 					}
 
@@ -1761,13 +1755,18 @@ public class ResourceApi extends ApiscolApi {
 
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
+
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
 		IResourceDataHandler resourceDataHandler = DBAccessFactory
 				.getResourceDataHandler(DBTypes.mongoDB);
+		logger.info("> Asking for thumb list, file : " + requestedFormat
+				+ " , resource id : " + resourceId + " , scorm type :"
+				+ resourceDataHandler.getScormTypeForResource(resourceId));
 		ThumbExtracter thumbsExtracter = ThumbExtracterFactory
 				.getExtracter(resourceDataHandler
 						.getScormTypeForResource(resourceId));
+		logger.info("Thumbextracter : " + thumbsExtracter.getClass().getName());
 		Map<String, Point> thumbsUris = thumbsExtracter.getThumbsFromResource(
 				resourceId, resourceDataHandler,
 				ResourcesKeySyntax.removeSSL(uriInfo.getBaseUri().toString()),

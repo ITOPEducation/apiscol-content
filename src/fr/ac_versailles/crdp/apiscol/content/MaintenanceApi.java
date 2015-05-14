@@ -131,8 +131,7 @@ public class MaintenanceApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context);
 		searchEngineQueryHandler.processOptimizationQuery();
-		return Response.ok(
-				rb.getSuccessfullOptimizationReport(requestedFormat, uriInfo),
+		return Response.ok(rb.getSuccessfullOptimizationReport(uriInfo),
 				rb.getMediaType()).build();
 	}
 
@@ -253,10 +252,7 @@ public class MaintenanceApi {
 			@QueryParam(value = "format") final String format,
 			@Context HttpServletRequest request,
 			@Context ServletContext context, @Context UriInfo uriInfo)
-			throws SearchEngineErrorException,
-			SearchEngineCommunicationException, DBAccessException,
-			FileSystemAccessException, ResourceDirectoryNotFoundException,
-			UnknownMediaTypeForResponseException {
+			throws Exception {
 		KeyLock keyLock = null;
 		IEntitiesRepresentationBuilder<?> rb = null;
 		try {

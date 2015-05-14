@@ -45,7 +45,7 @@ public class XMLRepresentationBuilder extends
 		AbstractRepresentationBuilder<Document> {
 
 	@Override
-	public Document getResourceRepresentation(String realPath, UriInfo uriInfo,
+	public Document getResourceRepresentation(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		Document XMLRepresentation = XMLUtils.createXMLDocument();
@@ -257,9 +257,8 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getFileSuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String fileName) {
+	public Document getFileSuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String fileName) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
 		Element stateElement = report.createElement("state");
@@ -278,9 +277,8 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceSuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings) {
+	public Document getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
 		Element stateElement = report.createElement("state");
@@ -303,9 +301,8 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceUnsuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings) {
+	public Document getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
 		Element stateElement = report.createElement("state");
@@ -324,16 +321,16 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getInexistentFileDestructionAttemptReport(String realPath,
-			UriInfo uriInfo, String resourceId, String fileName) {
+	public Document getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+			String resourceId, String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getCompleteResourceListRepresentation(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, int start, int rows,
-			String editUri) throws DBAccessException {
+	public Document getCompleteResourceListRepresentation(UriInfo uriInfo,
+			String apiscolInstanceName, int start, int rows, String editUri)
+			throws Exception {
 		ArrayList<String> resourcesList = getResourcesList();
 		Document response = XMLUtils.createXMLDocument();
 		Element rootElement = response.createElement("feed");
@@ -396,12 +393,11 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceStringRepresentation(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String editUri) throws DBAccessException,
-			InexistentResourceInDatabaseException {
-		return formatXML((Document) getResourceRepresentation(realPath,
-				uriInfo, apiscolInstanceName, resourceId, editUri));
+	public String getResourceStringRepresentation(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String editUri)
+			throws DBAccessException, InexistentResourceInDatabaseException {
+		return formatXML((Document) getResourceRepresentation(uriInfo,
+				apiscolInstanceName, resourceId, editUri));
 	}
 
 	private String formatXML(Document document) {
@@ -426,10 +422,9 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document selectResourceFollowingCriterium(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName,
-			ISearchEngineResultHandler handler, int start, int rows,
-			String editUri) throws DBAccessException {
+	public Document selectResourceFollowingCriterium(UriInfo uriInfo,
+			String apiscolInstanceName, ISearchEngineResultHandler handler,
+			int start, int rows, String editUri) throws DBAccessException {
 		Document response = XMLUtils.createXMLDocument();
 		Element resourcesElement = response.createElement("feed");
 		Element titleElement = response.createElement("title");
@@ -503,8 +498,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getSuccessfullOptimizationReport(String realPath,
-			UriInfo uriInfo) {
+	public Document getSuccessfullOptimizationReport(UriInfo uriInfo) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
 		Element stateElement = report.createElement("state");
@@ -627,8 +621,8 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceTechnicalInformations(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId)
+	public Document getResourceTechnicalInformations(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId)
 			throws ResourceDirectoryNotFoundException, DBAccessException,
 			InexistentResourceInDatabaseException {
 		Document infos = XMLUtils.createXMLDocument();

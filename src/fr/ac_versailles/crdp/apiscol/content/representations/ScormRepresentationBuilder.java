@@ -20,7 +20,8 @@ import fr.ac_versailles.crdp.apiscol.content.searchEngine.ISearchEngineResultHan
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
 
-public class ScormRepresentationBuilder extends AbstractRepresentationBuilder<Document> {
+public class ScormRepresentationBuilder extends
+		AbstractRepresentationBuilder<Document> {
 	private static final String XMLNS = "http://www.w3.org/2000/xmlns/";
 	private static final String IMS = "http://www.imsglobal.org/xsd/imscp_v1p1";
 	private static final String XSI = "http://www.w3.org/2001/XMLSchema-instance";
@@ -35,7 +36,7 @@ public class ScormRepresentationBuilder extends AbstractRepresentationBuilder<Do
 			+ "http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd";
 
 	@Override
-	public Document getResourceRepresentation(String realPath, UriInfo uriInfo,
+	public Document getResourceRepresentation(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		Document scormRepresentation = createScormXMLDocument();
@@ -131,24 +132,22 @@ public class ScormRepresentationBuilder extends AbstractRepresentationBuilder<Do
 	}
 
 	@Override
-	public Document getFileSuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String fileName) {
+	public Document getFileSuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getInexistentFileDestructionAttemptReport(String realPath,
-			UriInfo uriInfo, String resourceId, String fileName) {
+	public Document getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+			String resourceId, String fileName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getCompleteResourceListRepresentation(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, int start, int rows,
-			String editUri) {
+	public Document getCompleteResourceListRepresentation(UriInfo uriInfo,
+			String apiscolInstanceName, int start, int rows, String editUri) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -159,41 +158,36 @@ public class ScormRepresentationBuilder extends AbstractRepresentationBuilder<Do
 	}
 
 	@Override
-	public String getResourceStringRepresentation(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String string,
-			String editUri) {
+	public String getResourceStringRepresentation(UriInfo uriInfo,
+			String apiscolInstanceName, String string, String editUri) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document selectResourceFollowingCriterium(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName,
-			ISearchEngineResultHandler handler, int start, int rows,
-			String editUri) {
+	public Document selectResourceFollowingCriterium(UriInfo uriInfo,
+			String apiscolInstanceName, ISearchEngineResultHandler handler,
+			int start, int rows, String editUri) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getResourceSuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings) {
+	public Document getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getResourceUnsuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings) {
+	public Document getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getSuccessfullOptimizationReport(String realPath,
-			UriInfo uriInfo) {
+	public Document getSuccessfullOptimizationReport(UriInfo uriInfo) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -204,10 +198,9 @@ public class ScormRepresentationBuilder extends AbstractRepresentationBuilder<Do
 		return null;
 	}
 
-
 	@Override
-	public Document getResourceTechnicalInformations(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId) {
+	public Document getResourceTechnicalInformations(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

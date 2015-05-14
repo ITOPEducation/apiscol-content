@@ -4,21 +4,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Resource;
@@ -26,21 +19,19 @@ import nl.siegmann.epublib.domain.Spine;
 import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
 
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import org.apache.commons.io.IOUtils;
 
-import fr.ac_versailles.crdp.apiscol.UsedNamespaces;
 import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry.States;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
+import fr.ac_versailles.crdp.apiscol.content.resources.ResourcesLoader;
 import fr.ac_versailles.crdp.apiscol.utils.FileUtils;
 import fr.ac_versailles.crdp.apiscol.utils.JSonUtils;
 
 public class EpubMonoclePreviewMaker extends AbstractPreviewMaker {
 
 	public EpubMonoclePreviewMaker(String resourceId, String previewsRepoPath,
-			String entryPoint, String realPath, String previewUri) {
-		super(resourceId, previewsRepoPath, entryPoint, realPath, previewUri);
+			String entryPoint, String previewUri) {
+		super(resourceId, previewsRepoPath, entryPoint, previewUri);
 
 	}
 
@@ -113,14 +104,11 @@ public class EpubMonoclePreviewMaker extends AbstractPreviewMaker {
 			}
 		}
 
-		FileInputStream is = null;
-		try {
-			is = new FileInputStream(realPath
-					+ "/templates/epubpreviewwidget.html");
-		} catch (FileNotFoundException e) {
+		String widgetPath = "templates/epubpreviewwidget.html";
+		InputStream is = ResourcesLoader.loadResource(widgetPath);
+		if (is == null) {
 			trackingObject.updateStateAndMessage(States.aborted,
-					"Problem during templates reading : " + e.getMessage());
-			e.printStackTrace();
+					"Problem during templates reading : " + widgetPath);
 			return;
 		}
 		Map<String, String> tokens = new HashMap<String, String>();
@@ -140,9 +128,16 @@ public class EpubMonoclePreviewMaker extends AbstractPreviewMaker {
 		FileUtils.writeDataToFile(reader, htmlWidgetFilePath);
 		JSonUtils.convertHtmlFileToJson(htmlWidgetFilePath, "index.html.js");
 		String pageHtml = "";
+		String pagePath = "templates/previewpage.html";
+		is = ResourcesLoader.loadResource(pagePath);
+		if (is == null) {
+			trackingObject.updateStateAndMessage(States.aborted,
+					"The conversion process failed because of a template handling problem : "
+							+ pagePath);
+			return;
+		}
 		try {
-			pageHtml = FileUtils.readFileAsString(realPath
-					+ "/templates/previewpage.html");
+			pageHtml = IOUtils.toString(is, "UTF-8");
 			String widgetHtml = FileUtils.readFileAsString(htmlWidgetFilePath);
 			pageHtml = pageHtml.replace("WIDGET", widgetHtml);
 		} catch (IOException e) {

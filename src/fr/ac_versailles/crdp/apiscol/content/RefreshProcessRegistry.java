@@ -44,7 +44,6 @@ public class RefreshProcessRegistry {
 
 	public Integer register(IRefreshProcess task, String resourceId) {
 		counter++;
-		System.out.println("on attribue le counter " + counter);
 		String message = "The process has been initiated and is going to begin as soon as possible";
 		AsyncProcessTrackingObject trackingObject = new AsyncProcessTrackingObject(
 				counter, task, resourceId);

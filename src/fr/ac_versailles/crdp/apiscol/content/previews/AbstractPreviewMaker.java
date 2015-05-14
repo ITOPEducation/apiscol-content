@@ -20,12 +20,10 @@ public abstract class AbstractPreviewMaker implements IPreviewMaker {
 	protected String previewDirectoryPath;
 	protected final String resourceId;
 	protected final String entryPoint;
-	protected final String realPath;
 	protected final String previewUri;
 
 	public AbstractPreviewMaker(String resourceId, String previewsRepoPath,
-			String entryPoint, String realPath, String previewUri) {
-		this.realPath = realPath;
+			String entryPoint, String previewUri) {
 		this.previewUri = previewUri;
 		this.resourceId = resourceId;
 		this.entryPoint = entryPoint;

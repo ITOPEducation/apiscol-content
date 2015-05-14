@@ -154,9 +154,13 @@ public class ResourceDirectoryInterface {
 		return fileRepoPath != null && !fileRepoPath.isEmpty();
 	}
 
-	public static ArrayList<String> getResourcesList() {
+	public static ArrayList<String> getResourcesList() throws Exception {
 		ArrayList<String> list = new ArrayList<String>();
 		File dir = new File(fileRepoPath);
+		if (!dir.exists())
+			throw new Exception(
+					"Please create static content directory specified by service.properties :"
+							+ fileRepoPath);
 		for (File child1 : dir.listFiles()) {
 			if (".".equals(child1.getName()) || "..".equals(child1.getName())
 					|| child1.isFile()) {
@@ -195,6 +199,8 @@ public class ResourceDirectoryInterface {
 
 	public static boolean deleteFile(String resourceId, String fileName)
 			throws ResourceDirectoryNotFoundException {
+		// workaround for windows
+		System.gc();
 		File resourceDirectory = getResourceDirectory(resourceId.toString());
 		File file = new File(resourceDirectory.getAbsolutePath() + "/"
 				+ fileName);
@@ -249,6 +255,8 @@ public class ResourceDirectoryInterface {
 
 	public static boolean deleteResourceDirectory(String resourceId)
 			throws ResourceDirectoryNotFoundException {
+		// workaround for windows
+		System.gc();
 		boolean success = true;
 		File resourceDirectory = getResourceDirectory(resourceId.toString());
 		File parent = resourceDirectory.getParentFile();
@@ -321,7 +329,8 @@ public class ResourceDirectoryInterface {
 
 	public static void deleteTemporaryFile(String resourceId, String fileName)
 			throws ResourceDirectoryNotFoundException {
-
+		// workaround for windows
+		System.gc();
 		File resourceDirectory = getResourceDirectory(resourceId);
 		File providedFile = new File(String.format("%s/%s%s",
 				resourceDirectory.getAbsolutePath(), temporaryFilesPrefix,
@@ -399,6 +408,8 @@ public class ResourceDirectoryInterface {
 	public static void commitZip(String resourceId, String snapshotId) {
 		File tempZip = new File(getTemporaryZipPath(resourceId, snapshotId));
 		File zip = new File(getZipPath(resourceId));
+		// workaround for windows
+		System.gc();
 		if (zip.exists())
 			zip.delete();
 		tempZip.renameTo(zip);
@@ -406,11 +417,15 @@ public class ResourceDirectoryInterface {
 
 	public static void deleteSnapshot(String resourceId, String snapshotId)
 			throws ResourceSnapshotDirectoryNotFoundException {
+		// workaround for windows
+		System.gc();
 		FileUtils
 				.deleteDir(getResourceSnapshotDirectory(resourceId, snapshotId));
 	}
 
 	public static boolean deleteResourceArchive(String resourceId) {
+		// workaround for windows
+		System.gc();
 		return new File(getZipPath(resourceId)).delete();
 	}
 
@@ -425,6 +440,8 @@ public class ResourceDirectoryInterface {
 	}
 
 	public static void deleteAllFiles() {
+		// workaround for windows
+		System.gc();
 		File resourceDir = new File(fileRepoPath);
 		for (File dir : resourceDir.listFiles()) {
 			if (!dir.getName().equals("..") && !dir.getName().equals("."))
@@ -487,9 +504,12 @@ public class ResourceDirectoryInterface {
 
 	public static Map<String, Point> getImagesList(String resourceId,
 			String mainFileName) throws ResourceDirectoryNotFoundException {
+		logger.info("> Looking for image list, file : " + mainFileName
+				+ " , resource id : " + resourceId);
 		File dir = getResourceDirectory(resourceId);
 		File pointedDir = dir;
 		File unzipDir;
+
 		if (!StringUtils.isEmpty(mainFileName)) {
 			File mainFile = new File(getFilePath(resourceId, mainFileName));
 			Boolean izZip = false;
@@ -553,20 +573,20 @@ public class ResourceDirectoryInterface {
 
 	private static boolean extractThumbsFromPdf(String fileName, File outputDir) {
 		try {
-			String[] commande = { "pdfimages", "-j", fileName, "thumb" }; 
-			System.out.println("******************"
-					+ outputDir.getAbsolutePath());
+			String[] commande = { "pdfimages", "-j", fileName, "thumb" };
+			logger.info("***commande****" + commande);
+			logger.info("******************" + outputDir.getAbsolutePath());
 			String[] envp = {};
 			Process p = Runtime.getRuntime().exec(commande, envp, outputDir);
 			BufferedReader output = getOutput(p);
 			BufferedReader error = getError(p);
 			String ligne = "";
 			while ((ligne = output.readLine()) != null) {
-				System.out.println("***********pdf extraction err. " + ligne);
+				logger.info("***********pdf extraction err. " + ligne);
 			}
 
 			while ((ligne = error.readLine()) != null) {
-				System.out.println("***********pdf extraction. " + ligne);
+				logger.info("***********pdf extraction. " + ligne);
 			}
 
 			p.waitFor();
@@ -585,11 +605,11 @@ public class ResourceDirectoryInterface {
 			BufferedReader error = getError(p);
 			String ligne = "";
 			while ((ligne = output.readLine()) != null) {
-				System.out.println("***********ppm conversion err. " + ligne);
+				logger.info("***********ppm conversion err. " + ligne);
 			}
 
 			while ((ligne = error.readLine()) != null) {
-				System.out.println("***********ppm extraction. " + ligne);
+				logger.info("***********ppm extraction. " + ligne);
 			}
 
 			p.waitFor();

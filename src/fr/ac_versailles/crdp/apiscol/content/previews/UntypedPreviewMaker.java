@@ -6,8 +6,8 @@ public class UntypedPreviewMaker extends AbstractPreviewMaker implements
 		IPreviewMaker {
 
 	public UntypedPreviewMaker(String resourceId, String previewsRepoPath,
-			String entryPoint, String realPath, String previewUri) {
-		super(resourceId, previewsRepoPath, entryPoint, realPath, previewUri);
+			String entryPoint, String previewUri) {
+		super(resourceId, previewsRepoPath, entryPoint, previewUri);
 	}
 
 	@Override
@@ -17,8 +17,7 @@ public class UntypedPreviewMaker extends AbstractPreviewMaker implements
 
 	@Override
 	protected void createNewPreview() {
-		trackingObject
-		.updateStateAndMessage(States.aborted,
+		trackingObject.updateStateAndMessage(States.aborted,
 				"Impossible to build preview for this file : " + entryPoint
 						+ ". No preview maker registered for his mime type.");
 	}

@@ -39,7 +39,7 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	}
 
-	protected final ArrayList<String> getResourcesList() {
+	protected final ArrayList<String> getResourcesList() throws Exception {
 		return ResourceDirectoryInterface.getResourcesList();
 	}
 

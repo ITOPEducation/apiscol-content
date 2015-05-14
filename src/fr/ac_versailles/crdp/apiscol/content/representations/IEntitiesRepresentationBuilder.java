@@ -15,40 +15,39 @@ import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseExcept
 
 public interface IEntitiesRepresentationBuilder<T> {
 
-	T getResourceRepresentation(String realPath, UriInfo uriInfo,
+	T getResourceRepresentation(UriInfo uriInfo, String apiscolInstanceName,
+			String resourceId, String editUri) throws DBAccessException,
+			InexistentResourceInDatabaseException,
+			ResourceDirectoryNotFoundException;
+
+	String getResourceStringRepresentation(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException;
 
-	String getResourceStringRepresentation(String realPath, UriInfo uriInfo,
-			String apiscolInstanceName, String resourceId, String editUri)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException;
-
-	T getFileSuccessfulDestructionReport(String realPath, UriInfo uriInfo,
+	T getFileSuccessfulDestructionReport(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String fileName);
 
-	T getInexistentFileDestructionAttemptReport(String realPath,
-			UriInfo uriInfo, String resourceId, String fileName);
+	T getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+			String resourceId, String fileName);
 
-	T getCompleteResourceListRepresentation(String realPath, UriInfo uriInfo,
+	T getCompleteResourceListRepresentation(UriInfo uriInfo,
 			String apiscolInstanceName, int start, int rows, String editUri)
-			throws DBAccessException;
+			throws DBAccessException, Exception;
 
-	T selectResourceFollowingCriterium(String realPath, UriInfo uriInfo,
+	T selectResourceFollowingCriterium(UriInfo uriInfo,
 			String apiscolInstanceName, ISearchEngineResultHandler handler,
 			int start, int rows, String editUri) throws DBAccessException;
 
 	MediaType getMediaType();
 
-	T getResourceSuccessfulDestructionReport(String realPath, UriInfo uriInfo,
+	T getResourceSuccessfulDestructionReport(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String warnings);
 
-	T getResourceUnsuccessfulDestructionReport(String realPath,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
-			String warnings);
+	T getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+			String apiscolInstanceName, String resourceId, String warnings);
 
-	T getSuccessfullOptimizationReport(String realPath, UriInfo uriInfo);
+	T getSuccessfullOptimizationReport(UriInfo uriInfo);
 
 	T getLinkUpdateProcedureRepresentation(UriInfo uriInfo);
 
@@ -59,7 +58,7 @@ public interface IEntitiesRepresentationBuilder<T> {
 			String apiscolInstanceName, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException;
 
-	T getResourceTechnicalInformations(String realPath, UriInfo uriInfo,
+	T getResourceTechnicalInformations(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId)
 			throws ResourceDirectoryNotFoundException, DBAccessException,
 			InexistentResourceInDatabaseException;

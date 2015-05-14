@@ -16,11 +16,6 @@
 		<servlet-name>ApiScol_Content</servlet-name>
 		<servlet-class>fr.ac_versailles.crdp.apiscol.content.ApiscolContent</servlet-class>
 		<init-param>
-			<param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-			<param-value>fr.ac_versailles.crdp.apiscol.content.filters.SecurityFilter</param-value>
-		</init-param>
-
-		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
 			<param-value>fr.ac_versailles.crdp.apiscol.content</param-value>
 		</init-param>
