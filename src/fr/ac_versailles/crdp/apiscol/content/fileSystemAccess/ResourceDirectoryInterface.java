@@ -678,7 +678,9 @@ public class ResourceDirectoryInterface {
 				resourceDirectory.getAbsolutePath(), fileName));
 		if (!mainFile.exists()) {
 			logger.error("Impossible to find main file for resource "
-					+ resourceId + " while trying to determine mime type");
+					+ resourceId
+					+ " while trying to determine mime type with path :"
+					+ mainFile.getAbsolutePath() + " for file " + fileName);
 			return null;
 		}
 		return mimeTypeDetector.detectType(mainFile);
@@ -706,7 +708,9 @@ public class ResourceDirectoryInterface {
 				resourceDirectory.getAbsolutePath(), fileName));
 		if (!mainFile.exists()) {
 			logger.error("Impossible to find main file for resource "
-					+ resourceId + " while trying to extract text content");
+					+ resourceId
+					+ " while trying to extract text content with path :"
+					+ mainFile.getAbsolutePath() + " for file " + fileName);
 			return StringUtils.EMPTY;
 		}
 		return textExtractor.extractText(mainFile);
