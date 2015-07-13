@@ -45,8 +45,8 @@ import fr.ac_versailles.crdp.apiscol.ParametersKeys;
 import fr.ac_versailles.crdp.apiscol.RequestHandler;
 import fr.ac_versailles.crdp.apiscol.ResourcesKeySyntax;
 import fr.ac_versailles.crdp.apiscol.content.compression.CompressionTask;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.BadFileTypeException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.FileSystemAccessException;
@@ -197,7 +197,7 @@ public class ResourceApi extends ApiscolApi {
 			UnknownMediaTypeForResponseException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		return getResourceById(resourceId, request, requestedFormat,
@@ -228,7 +228,7 @@ public class ResourceApi extends ApiscolApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		Object response = rb.getResourceTechnicalInformations(uriInfo,
@@ -311,7 +311,7 @@ public class ResourceApi extends ApiscolApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		if (StringUtils.isNotBlank(metadataId)) {
@@ -421,7 +421,7 @@ public class ResourceApi extends ApiscolApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 
@@ -519,7 +519,7 @@ public class ResourceApi extends ApiscolApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 
@@ -814,7 +814,7 @@ public class ResourceApi extends ApiscolApi {
 			@DefaultValue("") @FormParam("edit_uri") String editUri)
 			throws DBAccessException, FileSystemAccessException,
 			UnknownMediaTypeForResponseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		askForGlobalLock();
@@ -949,7 +949,7 @@ public class ResourceApi extends ApiscolApi {
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
 		ResponseBuilder response = null;
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		askForGlobalLock();
@@ -1050,7 +1050,7 @@ public class ResourceApi extends ApiscolApi {
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
 		ResponseBuilder response = null;
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		askForGlobalLock();
@@ -1252,7 +1252,7 @@ public class ResourceApi extends ApiscolApi {
 			UnknownMediaTypeForResponseException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		KeyLock keyLock = null;
@@ -1471,7 +1471,7 @@ public class ResourceApi extends ApiscolApi {
 			UnknownMediaTypeForResponseException {
 		checkResidSyntax(resourceId);
 		String requestedFormat = guessRequestedFormat(request, format);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
@@ -1782,7 +1782,7 @@ public class ResourceApi extends ApiscolApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
 						dbConnexionParameters);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		logger.info("> Asking for thumb list, file : " + requestedFormat

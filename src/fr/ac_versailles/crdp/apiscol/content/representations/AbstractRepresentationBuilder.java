@@ -15,8 +15,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.log4j.Logger;
 
 import fr.ac_versailles.crdp.apiscol.content.ContentType;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
@@ -132,7 +132,7 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	protected String getMainFileForResource(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getMainFileForResource(resourceId);
@@ -140,7 +140,7 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	protected String getEtagForResource(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getEtagForResource(resourceId);
@@ -148,7 +148,7 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	protected String getMetadataUri(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getMetadataForResource(resourceId);
@@ -156,7 +156,7 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	protected ContentType getResourceType(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		return ContentType.convertStringToType(resourceDataHandler
@@ -165,7 +165,7 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	protected String getResourceUrl(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getUrlForResource(resourceId);

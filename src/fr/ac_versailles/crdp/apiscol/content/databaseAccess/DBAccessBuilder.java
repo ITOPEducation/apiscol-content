@@ -4,7 +4,7 @@ import java.util.Map;
 
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 
-public class DBAccessFactory {
+public class DBAccessBuilder {
 
 	private static DBTypes dbType;
 	private static IResourceDataHandler resourceDataHandler;
@@ -43,13 +43,13 @@ public class DBAccessFactory {
 		}
 	}
 
-	public DBAccessFactory setDbType(DBTypes dbType) {
-		DBAccessFactory.dbType = dbType;
+	public DBAccessBuilder setDbType(DBTypes dbType) {
+		DBAccessBuilder.dbType = dbType;
 		return this;
 	}
 
-	public DBAccessFactory setParameters(Map<String, String> parameters) {
-		DBAccessFactory.parameters = parameters;
+	public DBAccessBuilder setParameters(Map<String, String> parameters) {
+		DBAccessBuilder.parameters = parameters;
 		return this;
 	}
 

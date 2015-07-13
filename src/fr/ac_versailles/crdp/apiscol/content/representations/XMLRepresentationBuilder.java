@@ -30,8 +30,8 @@ import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry;
 import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry.States;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler.State;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
@@ -651,7 +651,7 @@ public class XMLRepresentationBuilder extends
 		rootElement.appendChild(apiscolInstanceElement);
 		rootElement.appendChild(formatElement);
 		rootElement.appendChild(previewElement);
-		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(dbConnexionParameters).build();
 

@@ -25,8 +25,8 @@ import fr.ac_versailles.crdp.apiscol.ApiscolApi;
 import fr.ac_versailles.crdp.apiscol.ParametersKeys;
 import fr.ac_versailles.crdp.apiscol.RequestHandler;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.FileSystemAccessException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
@@ -146,7 +146,7 @@ public class MaintenanceApi extends ApiscolApi {
 				String requestedFormat = guessRequestedFormat(request, format);
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(requestedFormat, context, dbConnexionParameters);
-				IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
 						.setParameters(dbConnexionParameters).build();
 				LinkRefreshingHandler.State state = LinkRefreshingHandler
@@ -206,7 +206,7 @@ public class MaintenanceApi extends ApiscolApi {
 			try {
 				ResourceDirectoryInterface.deleteAllFiles();
 				searchEngineQueryHandler.deleteIndex();
-				IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
 						.setParameters(dbConnexionParameters).build();
 				resourceDataHandler.deleteAllDocuments();
@@ -245,7 +245,7 @@ public class MaintenanceApi extends ApiscolApi {
 			try {
 
 				searchEngineQueryHandler.deleteIndex();
-				IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
 						.setParameters(dbConnexionParameters).build();
 				resourceDataHandler.deleteAllDocuments();
