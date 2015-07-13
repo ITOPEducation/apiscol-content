@@ -32,15 +32,7 @@ public class ApiscolContent extends ServletContainer {
 
 	@PreDestroy
 	public void deinitialize() {
-		IResourceDataHandler dataHandler = null;
-		try {
-			dataHandler = DBAccessFactory
-					.getResourceDataHandler(DBTypes.mongoDB);
-		} catch (DBAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		dataHandler.deInitialize();
+		DBAccessFactory.deInitialize();
 		ResourceApi.stopExecutors();
 	}
 

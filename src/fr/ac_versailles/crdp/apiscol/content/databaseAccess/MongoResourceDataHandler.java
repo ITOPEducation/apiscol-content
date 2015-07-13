@@ -38,8 +38,13 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 
 	private GregorianCalendar calendar;
 
-	public MongoResourceDataHandler() throws DBAccessException {
-		super();
+	public MongoResourceDataHandler(Map<String, String> dbParams)
+			throws DBAccessException {
+		super(dbParams);
+		initCalendar();
+	}
+
+	private void initCalendar() {
 		calendar = new GregorianCalendar();
 	}
 
@@ -70,11 +75,17 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 	}
 
 	@Override
-	protected void dbConnect() throws DBAccessException {
+	protected void dbConnect(Map<String, String> dbParams)
+			throws DBAccessException {
 		if (mongo != null) {
 			return;
 		}
-		mongo = MongoUtils.getMongoConnection();
+		mongo = MongoUtils.getMongoConnection(dbParams);
+		initResourcesCollection();
+
+	}
+
+	private void initResourcesCollection() throws DBAccessException {
 		resourcesCollection = MongoUtils.getCollection(DB_NAME,
 				COLLECTION_NAME, mongo);
 

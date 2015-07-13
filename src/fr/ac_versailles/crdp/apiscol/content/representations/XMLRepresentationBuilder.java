@@ -44,6 +44,10 @@ import fr.ac_versailles.crdp.apiscol.utils.XMLUtils;
 public class XMLRepresentationBuilder extends
 		AbstractRepresentationBuilder<Document> {
 
+	public XMLRepresentationBuilder(Map<String, String> dbParams) {
+		super(dbParams);
+	}
+
 	@Override
 	public Document getResourceRepresentation(UriInfo uriInfo,
 			String apiscolInstanceName, String resourceId, String editUri)
@@ -459,7 +463,6 @@ public class XMLRepresentationBuilder extends
 			score = handler.getResultScoresById().get(resultId);
 			type = handler.getResultTypesById().get(resultId);
 			snippets = handler.getResultSnippetsById().get(resultId);
-			// TODO gérer le cas d'un truc qui ne matche pas
 			List<String> matchFound = ResourcesKeySyntax
 					.analyseSolrResultId(resultId);
 
@@ -648,8 +651,9 @@ public class XMLRepresentationBuilder extends
 		rootElement.appendChild(apiscolInstanceElement);
 		rootElement.appendChild(formatElement);
 		rootElement.appendChild(previewElement);
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessFactory()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 
 		sizeElement.setTextContent(getResourceSize(resourceId,
 				resourceDataHandler));

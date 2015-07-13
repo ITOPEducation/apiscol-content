@@ -1,6 +1,7 @@
 package fr.ac_versailles.crdp.apiscol.content.databaseAccess;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -14,9 +15,10 @@ public abstract class AbstractResourcesDataHandler implements
 		IResourceDataHandler {
 	protected static Logger logger;
 
-	public AbstractResourcesDataHandler() throws DBAccessException {
+	public AbstractResourcesDataHandler(Map<String, String> dbParams)
+			throws DBAccessException {
 		createLogger();
-		dbConnect();
+		dbConnect(dbParams);
 	}
 
 	@Override
@@ -48,7 +50,8 @@ public abstract class AbstractResourcesDataHandler implements
 			String fileName) throws DBAccessException,
 			InexistentResourceInDatabaseException;
 
-	abstract protected void dbConnect() throws DBAccessException;
+	abstract protected void dbConnect(Map<String, String> dbParams)
+			throws DBAccessException;
 
 	@Override
 	public void createResourceEntry(String resourceId) throws DBAccessException {
@@ -155,7 +158,8 @@ public abstract class AbstractResourcesDataHandler implements
 					.format("Main file for resource %s has been erased, main file was arbitrarely set to ",
 							fileList.get(0)));
 			return true;
-		} else return false;
+		} else
+			return false;
 
 	}
 
@@ -170,6 +174,7 @@ public abstract class AbstractResourcesDataHandler implements
 
 	protected abstract String serialize(String resourceId);
 
-	public abstract void deserializeAndSaveToDataBase(String resourceId, String serializedData) throws DBAccessException;
+	public abstract void deserializeAndSaveToDataBase(String resourceId,
+			String serializedData) throws DBAccessException;
 
 }
