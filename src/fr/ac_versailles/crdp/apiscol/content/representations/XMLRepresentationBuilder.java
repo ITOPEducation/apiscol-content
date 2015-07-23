@@ -224,9 +224,16 @@ public class XMLRepresentationBuilder extends
 							apiscolInstanceName, resourceId, it.next());
 				}
 			} catch (ResourceDirectoryNotFoundException e) {
+				logger.warn(String.format(
+						"Directory not found for resource %s with message %s",
+						resourceId, e.getMessage()));
+				System.out.println(String.format(
+						"Directory not found for resource %s with message %s",
+						resourceId, e.getMessage()));
 				Element element = XMLDocument.createElement("status");
 				element.setTextContent("Directory not yet created");
 				rootElement.appendChild(element);
+				insertionElement.appendChild(rootElement);
 				return 0L;
 			}
 			if (ResourceDirectoryInterface.existResourceArchive(resourceId)) {
