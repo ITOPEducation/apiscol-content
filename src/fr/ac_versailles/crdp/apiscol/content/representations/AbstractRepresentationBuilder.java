@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -13,8 +15,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.log4j.Logger;
 
 import fr.ac_versailles.crdp.apiscol.content.ContentType;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
@@ -27,9 +29,11 @@ import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 public abstract class AbstractRepresentationBuilder<T> implements
 		IEntitiesRepresentationBuilder<T> {
 	protected static Logger logger;
+	protected Map<String, String> dbConnexionParameters;
 
-	public AbstractRepresentationBuilder() {
+	public AbstractRepresentationBuilder(Map<String, String> dbParams) {
 		createLogger();
+		this.dbConnexionParameters = dbParams;
 	}
 
 	private void createLogger() {
@@ -128,37 +132,42 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 	protected String getMainFileForResource(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getMainFileForResource(resourceId);
 	}
 
 	protected String getEtagForResource(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getEtagForResource(resourceId);
 	}
 
 	protected String getMetadataUri(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getMetadataForResource(resourceId);
 	}
 
 	protected ContentType getResourceType(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 		return ContentType.convertStringToType(resourceDataHandler
 				.getScormTypeForResource(resourceId));
 	}
 
 	protected String getResourceUrl(String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 		return resourceDataHandler.getUrlForResource(resourceId);
 	}
 

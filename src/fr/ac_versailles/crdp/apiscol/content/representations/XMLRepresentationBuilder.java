@@ -30,8 +30,8 @@ import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry;
 import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry.States;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler.State;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
@@ -43,6 +43,10 @@ import fr.ac_versailles.crdp.apiscol.utils.XMLUtils;
 
 public class XMLRepresentationBuilder extends
 		AbstractRepresentationBuilder<Document> {
+
+	public XMLRepresentationBuilder(Map<String, String> dbParams) {
+		super(dbParams);
+	}
 
 	@Override
 	public Document getResourceRepresentation(UriInfo uriInfo,
@@ -220,9 +224,16 @@ public class XMLRepresentationBuilder extends
 							apiscolInstanceName, resourceId, it.next());
 				}
 			} catch (ResourceDirectoryNotFoundException e) {
+				logger.warn(String.format(
+						"Directory not found for resource %s with message %s",
+						resourceId, e.getMessage()));
+				System.out.println(String.format(
+						"Directory not found for resource %s with message %s",
+						resourceId, e.getMessage()));
 				Element element = XMLDocument.createElement("status");
 				element.setTextContent("Directory not yet created");
 				rootElement.appendChild(element);
+				insertionElement.appendChild(rootElement);
 				return 0L;
 			}
 			if (ResourceDirectoryInterface.existResourceArchive(resourceId)) {
@@ -459,7 +470,6 @@ public class XMLRepresentationBuilder extends
 			score = handler.getResultScoresById().get(resultId);
 			type = handler.getResultTypesById().get(resultId);
 			snippets = handler.getResultSnippetsById().get(resultId);
-			// TODO gérer le cas d'un truc qui ne matche pas
 			List<String> matchFound = ResourcesKeySyntax
 					.analyseSolrResultId(resultId);
 
@@ -648,8 +658,9 @@ public class XMLRepresentationBuilder extends
 		rootElement.appendChild(apiscolInstanceElement);
 		rootElement.appendChild(formatElement);
 		rootElement.appendChild(previewElement);
-		IResourceDataHandler resourceDataHandler = DBAccessFactory
-				.getResourceDataHandler(DBTypes.mongoDB);
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(dbConnexionParameters).build();
 
 		sizeElement.setTextContent(getResourceSize(resourceId,
 				resourceDataHandler));

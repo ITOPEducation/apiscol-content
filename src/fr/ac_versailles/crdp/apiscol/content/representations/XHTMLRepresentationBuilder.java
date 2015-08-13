@@ -21,11 +21,13 @@ import fr.ac_versailles.crdp.apiscol.utils.XMLUtils;
 public class XHTMLRepresentationBuilder extends
 		AbstractRepresentationBuilder<String> {
 
-	private AbstractRepresentationBuilder<Document> innerBuilder;
-
-	public XHTMLRepresentationBuilder() {
-		innerBuilder = new XMLRepresentationBuilder();
+	public XHTMLRepresentationBuilder(Map<String, String> dbParams) {
+		super(dbParams);
+		innerBuilder = new XMLRepresentationBuilder(dbParams);
+		
 	}
+
+	private AbstractRepresentationBuilder<Document> innerBuilder;
 
 	@Override
 	public String getLinkUpdateProcedureRepresentation(UriInfo uriInfo) {

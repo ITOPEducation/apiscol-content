@@ -2,7 +2,9 @@ package fr.ac_versailles.crdp.apiscol.content;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -19,11 +21,12 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.log4j.Logger;
 import org.w3c.dom.DOMException;
 
+import fr.ac_versailles.crdp.apiscol.ApiscolApi;
 import fr.ac_versailles.crdp.apiscol.ParametersKeys;
 import fr.ac_versailles.crdp.apiscol.RequestHandler;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessFactory.DBTypes;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
+import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.FileSystemAccessException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
@@ -44,9 +47,7 @@ import fr.ac_versailles.crdp.apiscol.transactions.KeyLockManager;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 @Path("/maintenance")
-public class MaintenanceApi {
-	// TODO pb d'absence d'initialisation si maintenance est appelée avant toute
-	// recherche
+public class MaintenanceApi extends ApiscolApi {
 
 	private static Logger logger;
 	private static ISearchEngineQueryHandler searchEngineQueryHandler;
@@ -55,9 +56,8 @@ public class MaintenanceApi {
 	private static ISearchEngineFactory searchEngineFactory;
 
 	public MaintenanceApi(@Context ServletContext context) {
+		super(context);
 		if (!isInitialized) {
-			createLogger();
-			createKeyLockManager();
 			initializeResourceDirectoryInterface(context);
 			createSearchEngineQueryHandler(context);
 			isInitialized = true;
@@ -94,16 +94,6 @@ public class MaintenanceApi {
 
 	}
 
-	private void createKeyLockManager() {
-		keyLockManager = KeyLockManager.getInstance();
-	}
-
-	private void createLogger() {
-		if (logger == null)
-			logger = LogUtility
-					.createLogger(this.getClass().getCanonicalName());
-	}
-
 	/**
 	 * Creates a void resource
 	 * 
@@ -129,19 +119,11 @@ public class MaintenanceApi {
 			UnknownMediaTypeForResponseException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context);
+				.getRepresentationBuilder(requestedFormat, context,
+						dbConnexionParameters);
 		searchEngineQueryHandler.processOptimizationQuery();
 		return Response.ok(rb.getSuccessfullOptimizationReport(uriInfo),
 				rb.getMediaType()).build();
-	}
-
-	private String guessRequestedFormat(HttpServletRequest request,
-			String format) {
-		// TODO mettre un format par défaut
-		if (format == null)
-			return RequestHandler.extractAcceptHeader(request);
-		else
-			return RequestHandler.convertFormatQueryParam(format);
 	}
 
 	@POST
@@ -163,9 +145,10 @@ public class MaintenanceApi {
 				logger.info("Entering critical section with mutual exclusion for all the content service");
 				String requestedFormat = guessRequestedFormat(request, format);
 				rb = EntitiesRepresentationBuilderFactory
-						.getRepresentationBuilder(requestedFormat, context);
-				IResourceDataHandler resourceDataHandler = DBAccessFactory
-						.getResourceDataHandler(DBTypes.mongoDB);
+						.getRepresentationBuilder(requestedFormat, context, dbConnexionParameters);
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+						.setDbType(DBTypes.mongoDB)
+						.setParameters(dbConnexionParameters).build();
 				LinkRefreshingHandler.State state = LinkRefreshingHandler
 						.getInstance().getCurrentState();
 				if (state == LinkRefreshingHandler.State.INACTIVE) {
@@ -199,7 +182,7 @@ public class MaintenanceApi {
 			UnknownMediaTypeForResponseException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context);
+				.getRepresentationBuilder(requestedFormat, context, dbConnexionParameters);
 		return Response.ok()
 				.entity(rb.getLinkUpdateProcedureRepresentation(uriInfo))
 				.build();
@@ -223,12 +206,13 @@ public class MaintenanceApi {
 			try {
 				ResourceDirectoryInterface.deleteAllFiles();
 				searchEngineQueryHandler.deleteIndex();
-				IResourceDataHandler resourceDataHandler = DBAccessFactory
-						.getResourceDataHandler(DBTypes.mongoDB);
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+						.setDbType(DBTypes.mongoDB)
+						.setParameters(dbConnexionParameters).build();
 				resourceDataHandler.deleteAllDocuments();
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
-								MediaType.APPLICATION_ATOM_XML, context);
+								MediaType.APPLICATION_ATOM_XML, context, dbConnexionParameters);
 			} finally {
 				keyLock.unlock();
 
@@ -261,8 +245,9 @@ public class MaintenanceApi {
 			try {
 
 				searchEngineQueryHandler.deleteIndex();
-				IResourceDataHandler resourceDataHandler = DBAccessFactory
-						.getResourceDataHandler(DBTypes.mongoDB);
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+						.setDbType(DBTypes.mongoDB)
+						.setParameters(dbConnexionParameters).build();
 				resourceDataHandler.deleteAllDocuments();
 				ArrayList<String> resourceList = ResourceDirectoryInterface
 						.getResourcesList();
@@ -295,7 +280,8 @@ public class MaintenanceApi {
 
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
-								MediaType.APPLICATION_ATOM_XML, context);
+								MediaType.APPLICATION_ATOM_XML, context,
+								dbConnexionParameters);
 			} finally {
 				keyLock.unlock();
 
@@ -311,4 +297,5 @@ public class MaintenanceApi {
 		return Response.ok().entity(rb.getSuccessfulGlobalDeletionReport())
 				.build();
 	}
+
 }

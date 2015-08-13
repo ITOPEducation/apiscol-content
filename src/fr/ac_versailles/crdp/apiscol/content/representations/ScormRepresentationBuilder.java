@@ -22,6 +22,11 @@ import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseExcept
 
 public class ScormRepresentationBuilder extends
 		AbstractRepresentationBuilder<Document> {
+	public ScormRepresentationBuilder(Map<String, String> dbParams) {
+		super(dbParams);
+		// TODO Auto-generated constructor stub
+	}
+
 	private static final String XMLNS = "http://www.w3.org/2000/xmlns/";
 	private static final String IMS = "http://www.imsglobal.org/xsd/imscp_v1p1";
 	private static final String XSI = "http://www.w3.org/2001/XMLSchema-instance";
