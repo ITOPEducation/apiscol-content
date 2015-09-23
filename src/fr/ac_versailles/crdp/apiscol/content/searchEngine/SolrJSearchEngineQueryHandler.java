@@ -70,6 +70,12 @@ public class SolrJSearchEngineQueryHandler implements ISearchEngineQueryHandler 
 							keywords, e.getMessage());
 			logger.error(error);
 			throw new SearchEngineErrorException(error);
+		} catch (IOException e) {
+			String error = String
+					.format("Solr has thrown an exception when he was asked to search keywords  for completion  %s whith the message %s",
+							keywords, e.getMessage());
+			logger.error(error);
+			throw new SearchEngineErrorException(error);
 		}
 		return response;
 	}
@@ -93,6 +99,12 @@ public class SolrJSearchEngineQueryHandler implements ISearchEngineQueryHandler 
 		} catch (SolrServerException e) {
 			String error = String
 					.format("Solr has thrown an exception when he was asked to search keywords  for completion  %s whith the message %s",
+							keywords, e.getMessage());
+			logger.error(error);
+			throw new SearchEngineErrorException(error);
+		} catch (IOException e) {
+			String error = String
+					.format("Solr has thrown an IO exception when he was asked to search keywords  for completion  %s whith the message %s",
 							keywords, e.getMessage());
 			logger.error(error);
 			throw new SearchEngineErrorException(error);
