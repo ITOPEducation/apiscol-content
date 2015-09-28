@@ -120,7 +120,7 @@ public class MaintenanceApi extends ApiscolApi {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
-						dbConnexionParameters);
+						getDbConnexionParameters());
 		searchEngineQueryHandler.processOptimizationQuery();
 		return Response.ok(rb.getSuccessfullOptimizationReport(uriInfo),
 				rb.getMediaType()).build();
@@ -145,10 +145,10 @@ public class MaintenanceApi extends ApiscolApi {
 				logger.info("Entering critical section with mutual exclusion for all the content service");
 				String requestedFormat = guessRequestedFormat(request, format);
 				rb = EntitiesRepresentationBuilderFactory
-						.getRepresentationBuilder(requestedFormat, context, dbConnexionParameters);
+						.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
 				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
-						.setParameters(dbConnexionParameters).build();
+						.setParameters(getDbConnexionParameters()).build();
 				LinkRefreshingHandler.State state = LinkRefreshingHandler
 						.getInstance().getCurrentState();
 				if (state == LinkRefreshingHandler.State.INACTIVE) {
@@ -182,7 +182,7 @@ public class MaintenanceApi extends ApiscolApi {
 			UnknownMediaTypeForResponseException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context, dbConnexionParameters);
+				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
 		return Response.ok()
 				.entity(rb.getLinkUpdateProcedureRepresentation(uriInfo))
 				.build();
@@ -208,11 +208,11 @@ public class MaintenanceApi extends ApiscolApi {
 				searchEngineQueryHandler.deleteIndex();
 				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
-						.setParameters(dbConnexionParameters).build();
+						.setParameters(getDbConnexionParameters()).build();
 				resourceDataHandler.deleteAllDocuments();
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
-								MediaType.APPLICATION_ATOM_XML, context, dbConnexionParameters);
+								MediaType.APPLICATION_ATOM_XML, context, getDbConnexionParameters());
 			} finally {
 				keyLock.unlock();
 
@@ -247,7 +247,7 @@ public class MaintenanceApi extends ApiscolApi {
 				searchEngineQueryHandler.deleteIndex();
 				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
-						.setParameters(dbConnexionParameters).build();
+						.setParameters(getDbConnexionParameters()).build();
 				resourceDataHandler.deleteAllDocuments();
 				ArrayList<String> resourceList = ResourceDirectoryInterface
 						.getResourcesList();
@@ -281,7 +281,7 @@ public class MaintenanceApi extends ApiscolApi {
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
 								MediaType.APPLICATION_ATOM_XML, context,
-								dbConnexionParameters);
+								getDbConnexionParameters());
 			} finally {
 				keyLock.unlock();
 
