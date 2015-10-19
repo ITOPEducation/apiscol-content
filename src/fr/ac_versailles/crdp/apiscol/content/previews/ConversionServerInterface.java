@@ -1,6 +1,7 @@
 package fr.ac_versailles.crdp.apiscol.content.previews;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -47,8 +48,6 @@ public class ConversionServerInterface {
 				.field("file", file, MediaType.MULTIPART_FORM_DATA_TYPE)
 				.field("output-mime-types", jsonMimeTypesList)
 				.field("fname", file.getName()).field("page-limit", "10");
-		System.out.println("asking for conversion of file "
-				+ file.getAbsolutePath());
 		ClientResponse previewsWebServiceResponse;
 		try {
 			previewsWebServiceResponse = conversionWebServiceResource
@@ -57,15 +56,21 @@ public class ConversionServerInterface {
 					.header(HttpHeaders.IF_MATCH, UUID.randomUUID().toString())
 					.entity(form).post(ClientResponse.class);
 		} catch (UniformInterfaceException e2) {
-			logger.error("Request to previews web service was aborted for file"
+			logger.error("Request to previews web service was aborted for file or url"
 					+ filePath + " with message " + e2.getMessage());
 			e2.printStackTrace();
 			return null;
 		} catch (ClientHandlerException e2) {
-			logger.error("Request to previews web service was aborted for file"
+			logger.error("Request to previews web service was aborted for file or url"
 					+ filePath + " with message " + e2.getMessage());
 			e2.printStackTrace();
 			return null;
+		} finally {
+			try {
+				form.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		Document xmlResponse;
 		int status = previewsWebServiceResponse.getStatus();
@@ -75,14 +80,14 @@ public class ConversionServerInterface {
 				xmlResponse = previewsWebServiceResponse
 						.getEntity(Document.class);
 			} catch (Exception e1) {
-				String string = "Error while trying to connect to previews service for file "
+				String string = "Error while trying to connect to previews service for file or url "
 						+ filePath;
 				logger.error(string);
 				return null;
 			}
 		} else {
 			String message = previewsWebServiceResponse.getEntity(String.class);
-			String string = "Error response while trying to connect to previews service for file "
+			String string = "Error response while trying to connect to previews service for file or url "
 					+ filePath
 					+ " With code "
 					+ status
@@ -116,7 +121,7 @@ public class ConversionServerInterface {
 				xmlResponse = previewsWebServiceResponse
 						.getEntity(Document.class);
 			} catch (Exception e1) {
-				logger.error("Error while trying to get conversion representation from previews service for file "
+				logger.error("Error while trying to get conversion representation from previews service for file or url "
 						+ filePath + " with uri " + conversionUrl);
 				return null;
 			}
@@ -132,7 +137,7 @@ public class ConversionServerInterface {
 			counter++;
 		}
 		if (!success) {
-			logger.error("Error while trying to get format conversion result for file "
+			logger.error("Error while trying to get format conversion result for file or url "
 					+ filePath);
 			return null;
 		}
