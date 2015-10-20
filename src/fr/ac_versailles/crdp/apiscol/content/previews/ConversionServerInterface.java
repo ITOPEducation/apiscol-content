@@ -44,10 +44,16 @@ public class ConversionServerInterface {
 			Set<String> mimeTypeList) {
 		String jsonMimeTypesList = new Gson().toJson(mimeTypeList);
 		File file = new File(filePath);
-		FormDataMultiPart form = new FormDataMultiPart()
-				.field("file", file, MediaType.MULTIPART_FORM_DATA_TYPE)
-				.field("output-mime-types", jsonMimeTypesList)
-				.field("fname", file.getName()).field("page-limit", "10");
+		FormDataMultiPart form = new FormDataMultiPart();
+
+		form.field("output-mime-types", jsonMimeTypesList).field("page-limit",
+				"10");
+		if (file.exists())
+			form.field("file", file, MediaType.MULTIPART_FORM_DATA_TYPE).field(
+					"fname", file.getName());
+		else
+			// TODO check that it is a valid uri
+			form.field("fname", filePath);
 		ClientResponse previewsWebServiceResponse;
 		try {
 			previewsWebServiceResponse = conversionWebServiceResource
@@ -98,7 +104,6 @@ public class ConversionServerInterface {
 		}
 
 		String conversionUrl = extractConversionUrl(xmlResponse);
-		System.out.println(conversionUrl);
 		String conversionId = conversionUrl.replace(
 				conversionWebServiceResource.getURI().toString()
 						+ "/conversion/", "");
@@ -165,7 +170,6 @@ public class ConversionServerInterface {
 				for (int j = 0; j < files.getLength(); j++) {
 					file = (Element) files.item(j);
 					list.add(file.getAttribute("href"));
-					System.out.println(file.getAttribute("href"));
 				}
 			}
 		}

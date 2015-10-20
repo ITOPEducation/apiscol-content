@@ -53,11 +53,12 @@ public class OfficeDocumentPreviewMaker extends AbstractPreviewMaker {
 				.updateStateAndMessage(
 						States.pending,
 						"The document has been converted to jpeg images and will be fetched back to ApiScol Content handler.");
-			writePreviewFileToDisk(images.get(0));
+		for (int i = 0; i < Math.min(images.size(), DEFAULT_PAGES_NUMBER); i++) {
+			writePreviewFileToDisk(images.get(i));
 			pages.append("<img src=\"" + previewUri + "/page" + (i + 1)
 					+ ".png\" />");
 
-		
+		}
 		trackingObject
 				.updateStateAndMessage(
 						States.pending,

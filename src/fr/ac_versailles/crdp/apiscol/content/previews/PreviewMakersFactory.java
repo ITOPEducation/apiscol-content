@@ -57,9 +57,13 @@ public class PreviewMakersFactory {
 		if (logger == null)
 			createLogger();
 		logger.info("Askin preview maker for mime type : " + mimeType);
+		// TODO choice parameter
 		if (isRemote)
-			return new RemoteResourcePreviewMaker(resourceId, previewsRepoPath,
-					entryPoint, previewUri);
+			// return new RemoteResourcePreviewMaker(resourceId,
+			// previewsRepoPath,
+			// entryPoint, previewUri);
+			return new RemoteResourceSnapshotPreviewMaker(resourceId,
+					previewsRepoPath, entryPoint, previewUri);
 		if (StringUtils.equals(mimeType, "application/x-uniboard+zip"))
 			return new UniboardPreviewMaker(resourceId, previewsRepoPath,
 					entryPoint, previewUri);
