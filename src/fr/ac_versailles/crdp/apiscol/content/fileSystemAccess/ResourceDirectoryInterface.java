@@ -1,5 +1,6 @@
 package fr.ac_versailles.crdp.apiscol.content.fileSystemAccess;
 
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -9,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +36,8 @@ import fr.ac_versailles.crdp.apiscol.utils.FileUtils;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 public class ResourceDirectoryInterface {
+
+	private static final float PREVIEWS_IMAGE_MAX_HEIGHT_PROPORTION = 0.75f;
 
 	private static Logger logger = null;
 
@@ -718,6 +722,53 @@ public class ResourceDirectoryInterface {
 
 	public static String getTextContent(String resourceId, URL url) {
 		return textExtractor.extractText(url);
+	}
+
+	public static boolean cropImage(String filePath) {
+		logger.info(String.format("Trying to resize imafe file %s", filePath));
+		BufferedImage largeImage;
+		try {
+			largeImage = ImageIO.read(new File(filePath));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		int width, height;
+		height = largeImage.getHeight();
+		width = largeImage.getWidth();
+
+		logger.info(String
+				.format("The image size is %d x %d px", width, height));
+		if (height < width * PREVIEWS_IMAGE_MAX_HEIGHT_PROPORTION)
+			return true;
+		height = Math.round((float) width
+				* PREVIEWS_IMAGE_MAX_HEIGHT_PROPORTION);
+		logger.info(String.format(
+				"The image will be resized to a height of %d ", height));
+
+		if (height == 0 || width == 0) {
+			logger.warn("Impossible to compute image dimensions");
+			return false;
+		}
+
+		BufferedImage smallImage = largeImage.getSubimage(0, 0, width, height);
+
+		return writeToDisk(smallImage, filePath);
+	}
+
+	private static boolean writeToDisk(BufferedImage image, String filePath) {
+		File outputFile = new File(filePath);
+		if (outputFile.exists())
+			outputFile.delete();
+		outputFile.mkdirs();
+		try {
+			ImageIO.write(image, "png", outputFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 }

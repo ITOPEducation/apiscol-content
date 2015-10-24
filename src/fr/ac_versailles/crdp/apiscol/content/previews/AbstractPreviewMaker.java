@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import fr.ac_versailles.crdp.apiscol.content.AsyncProcessTrackingObject;
+import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.utils.FileUtils;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
@@ -90,6 +91,11 @@ public abstract class AbstractPreviewMaker implements IPreviewMaker {
 	}
 
 	protected void writePreviewFileToDisk(String urlStr, String forceName) {
+		writePreviewFileToDisk(urlStr, forceName, false);
+	}
+
+	protected void writePreviewFileToDisk(String urlStr, String forceName,
+			Boolean resize) {
 		try {
 			URL url = new URL(urlStr);
 			url.openConnection();
@@ -113,11 +119,22 @@ public abstract class AbstractPreviewMaker implements IPreviewMaker {
 			}
 			writer.close();
 			reader.close();
+			if (resize) {
+				resizeImage(filePath);
+			}
+
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	private void resizeImage(String filePath) {
+		boolean success = ResourceDirectoryInterface.cropImage(filePath);
+		if (!success)
+			logger.warn("File resize failure " + filePath);
 
 	}
 

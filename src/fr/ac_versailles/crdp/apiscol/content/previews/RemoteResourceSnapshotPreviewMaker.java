@@ -48,7 +48,7 @@ public class RemoteResourceSnapshotPreviewMaker extends AbstractPreviewMaker {
 				.updateStateAndMessage(
 						States.pending,
 						"The web page has been converted to a jpeg image and will be fetched back to ApiScol Content handler.");
-		writePreviewFileToDisk(images.get(0), "snapshot");
+		writePreviewFileToDisk(images.get(0), "snapshot", true);
 		String imgSrc = previewUri + "/snapshot.png";
 
 		trackingObject

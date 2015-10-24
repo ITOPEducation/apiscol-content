@@ -19,8 +19,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
+import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
+import fr.ac_versailles.crdp.apiscol.content.previews.AbstractPreviewMaker;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
+import fr.ac_versailles.crdp.apiscol.utils.FileUtils;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 public class WebPageThumbExtracter implements ThumbExtracter {
@@ -114,9 +117,33 @@ public class WebPageThumbExtracter implements ThumbExtracter {
 					.createLogger(this.getClass().getCanonicalName());
 	}
 
+	//TODO factorize
 	@Override
 	public Map<String, Point> getThumbsFromPreview(String resourceId,
-			String previewsRepoPath, String baseUr) {
-		return Collections.emptyMap();
+			String previewsRepoPath, String baseUrl) {
+		Map<String, Point> urlList = new HashMap<String, Point>();
+		Map<String, Point> imagesFilePathList = ResourceDirectoryInterface
+				.getImagesInPreviewDirectoryList(AbstractPreviewMaker
+						.buildPreviewsDirectoryPath(previewsRepoPath,
+								resourceId));
+		Iterator<String> it = imagesFilePathList.keySet().iterator();
+		while (it.hasNext()) {
+			String filePath = (String) it.next();
+			Point image = imagesFilePathList.get(filePath);
+			urlList.put(
+					getPreviewThumbUrlFromFilePath(baseUrl, resourceId,
+							filePath), image);
+		}
+		return urlList;
+	}
+
+	//TODO factorize
+	private String getPreviewThumbUrlFromFilePath(String baseUri,
+			String resourceId, String filePath) {
+		return String
+				.format("%spreviews%s",
+						baseUri,
+						FileUtils.getFilePathHierarchy("", resourceId + "/"
+								+ filePath));
 	}
 }
