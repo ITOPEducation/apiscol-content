@@ -80,6 +80,7 @@ public class ConversionServerInterface {
 		}
 		Document xmlResponse;
 		int status = previewsWebServiceResponse.getStatus();
+		System.out.println(previewsWebServiceResponse.toString());
 
 		if (Response.Status.OK.getStatusCode() == status) {
 			try {
