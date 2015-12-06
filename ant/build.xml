@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
-<project default="ask" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	<taskdef name="if" classname="net.sf.antcontrib.logic.IfTask" />
 
 	<property name="workspace.dir" value="${basedir}/../..">
@@ -31,16 +31,6 @@
 			<include name="*.jar" />
 		</fileset>
 	</path>
-	<target name="ask">
-		<input message="Build apiscol content ?" validargs="true,false"
-			addproperty="deploy-content" defaultvalue="true" />
-		<if>
-			<equals arg1="${deploy-content}" arg2="true" />
-			<then>
-				<antcall target="compile" />
-			</then>
-		</if>
-	</target>
 	<target name="clean">
 
 		<delete includeemptydirs="true" failonerror="false">
@@ -50,13 +40,11 @@
 	<target name="resolve" depends="clean">
 		<ivy:resolve file="${ivy.file}" conf="content">
 		</ivy:resolve>
-		<ivy:retrieve sync="true" type="jar,bundle"
-			pattern="${libs.dir}/[artifact]-[revision].[ext]" conf="content" />
+		<ivy:retrieve sync="true" type="jar,bundle" pattern="${libs.dir}/[artifact]-[revision].[ext]" conf="content" />
 	</target>
 	<target name="compile" depends="resolve">
 		<mkdir dir="${build.dir}" />
-		<javac srcdir="${src.dir}" destdir="${build.dir}"
-			includeantruntime="false">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false">
 			<classpath>
 				<fileset dir="${libs.dir}">
 					<include name="*.jar" />
@@ -65,8 +53,8 @@
 				</path>
 			</classpath>
 		</javac>
-		<copy file="${src.dir}/log4j.properties" tofile="${build.dir}/log4j.properties">
-		</copy>
+		<copyfile dest="${build.dir}/log4j.properties" src="${src.dir}/log4j.properties" />
+		<copyfile dest="${build.dir}/log4j.eclipse.properties" src="${src.dir}/log4j.eclipse.properties" />
 		<copy todir="${build.dir}">
 			<fileset dir="${src.dir}">
 				<include name="**/*.html" />
