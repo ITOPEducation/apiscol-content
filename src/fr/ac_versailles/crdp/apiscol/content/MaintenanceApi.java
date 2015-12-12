@@ -49,10 +49,8 @@ import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 @Path("/maintenance")
 public class MaintenanceApi extends ApiscolApi {
 
-	private static Logger logger;
 	private static ISearchEngineQueryHandler searchEngineQueryHandler;
 	private static boolean isInitialized = false;
-	private static KeyLockManager keyLockManager;
 	private static ISearchEngineFactory searchEngineFactory;
 
 	public MaintenanceApi(@Context ServletContext context) {
@@ -145,7 +143,8 @@ public class MaintenanceApi extends ApiscolApi {
 				logger.info("Entering critical section with mutual exclusion for all the content service");
 				String requestedFormat = guessRequestedFormat(request, format);
 				rb = EntitiesRepresentationBuilderFactory
-						.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+						.getRepresentationBuilder(requestedFormat, context,
+								getDbConnexionParameters());
 				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 						.setDbType(DBTypes.mongoDB)
 						.setParameters(getDbConnexionParameters()).build();
@@ -182,7 +181,8 @@ public class MaintenanceApi extends ApiscolApi {
 			UnknownMediaTypeForResponseException {
 		String requestedFormat = guessRequestedFormat(request, format);
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
-				.getRepresentationBuilder(requestedFormat, context, getDbConnexionParameters());
+				.getRepresentationBuilder(requestedFormat, context,
+						getDbConnexionParameters());
 		return Response.ok()
 				.entity(rb.getLinkUpdateProcedureRepresentation(uriInfo))
 				.build();
@@ -212,7 +212,8 @@ public class MaintenanceApi extends ApiscolApi {
 				resourceDataHandler.deleteAllDocuments();
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
-								MediaType.APPLICATION_ATOM_XML, context, getDbConnexionParameters());
+								MediaType.APPLICATION_ATOM_XML, context,
+								getDbConnexionParameters());
 			} finally {
 				keyLock.unlock();
 

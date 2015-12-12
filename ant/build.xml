@@ -32,7 +32,6 @@
 		</fileset>
 	</path>
 	<target name="clean">
-
 		<delete includeemptydirs="true" failonerror="false">
 			<fileset dir="${build.dir}" includes="**/*" excludes="**/log4j.properties" />
 		</delete>
@@ -44,7 +43,7 @@
 	</target>
 	<target name="compile" depends="resolve">
 		<mkdir dir="${build.dir}" />
-		<javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false" debug="false">
 			<classpath>
 				<fileset dir="${libs.dir}">
 					<include name="*.jar" />
