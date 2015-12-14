@@ -1207,17 +1207,6 @@ public class ResourceApi extends ApiscolApi {
 		return identifier;
 	}
 
-	private void deleteResourcePreview(String resourceId,
-			String resourcePreviewDirectoryUri) {
-		String previewDirectoryPath = FileUtils.getFilePathHierarchy(
-				previewsRepoPath, resourceId);
-		if (!FileUtils.deleteDir(new File(previewDirectoryPath)))
-			logger.error(String.format(
-					"Unable to delete preview directory %s for resource %s",
-					previewDirectoryPath, resourceId));
-
-	}
-
 	@DELETE
 	@Path("/resource/{resid}")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
@@ -1714,9 +1703,8 @@ public class ResourceApi extends ApiscolApi {
 								.format("A communication problem with search engine occured while trying to commit to search engine index from search engine index with message %s",
 										e.getMessage()));
 					}
-				String resourcePreviewDirectory = rb
-						.getResourcePreviewDirectoryUri(uriInfo, resourceId);
-				deleteResourcePreview(resourceId, resourcePreviewDirectory);
+				ResourceDirectoryInterface.deleteResourcePreview(resourceId,
+						previewsRepoPath);
 				if (response == null) {
 
 					{

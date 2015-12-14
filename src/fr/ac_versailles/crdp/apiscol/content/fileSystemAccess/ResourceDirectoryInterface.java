@@ -769,4 +769,34 @@ public class ResourceDirectoryInterface {
 		return true;
 	}
 
+	public static boolean deleteResourcePreview(final String resourceId,
+			final String previewsRepoPath) {
+		String previewDirectoryPath = FileUtils.getFilePathHierarchy(
+				previewsRepoPath, resourceId);
+
+		// workaround for windows
+		System.gc();
+		boolean success = true;
+		File previewDirectory = new File(previewDirectoryPath);
+		File parent = previewDirectory.getParentFile();
+		File grandParent = parent.getParentFile();
+		File grandgrandParent = grandParent.getParentFile();
+		success &= FileUtils.deleteDir(previewDirectory);
+		if (!success) {
+			logger.error(String.format(
+					"Unable to delete preview directory %s for resource %s",
+					previewDirectoryPath, resourceId));
+		}
+		if (success && parent.list().length == 0) {
+			success &= FileUtils.deleteDir(parent);
+			if (success && grandParent.list().length == 0) {
+				success &= FileUtils.deleteDir(grandParent);
+				if (success && grandgrandParent.list().length == 0) {
+					success &= FileUtils.deleteDir(grandgrandParent);
+				}
+			}
+		}
+		return success;
+	}
+
 }
