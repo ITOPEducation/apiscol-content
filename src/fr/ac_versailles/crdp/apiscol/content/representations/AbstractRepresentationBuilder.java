@@ -2,6 +2,7 @@ package fr.ac_versailles.crdp.apiscol.content.representations;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -53,19 +54,18 @@ public abstract class AbstractRepresentationBuilder<T> implements
 		return ResourceDirectoryInterface.getFileNamesList(resourceId);
 	}
 
-	protected final String getFileDownloadUrl(UriInfo uriInfo,
-			String resourceId, String fileName) {
+	protected final String getFileDownloadUrl(URI baseUri, String resourceId,
+			String fileName) {
 		String encodedFileName = null;
 		try {
 			encodedFileName = URLEncoder.encode(fileName, "UTF-8").replace("+",
 					"%20");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return String.format("%sresources%s/%s", uriInfo.getBaseUri()
-				.toString(), FileUtils.getFilePathHierarchy("",
-				resourceId.toString()), encodedFileName);
+		return String.format("%s/resources%s/%s", baseUri.toString(),
+				FileUtils.getFilePathHierarchy("", resourceId.toString()),
+				encodedFileName);
 	}
 
 	protected final String getResourceUrn(String resourceId,
@@ -74,37 +74,33 @@ public abstract class AbstractRepresentationBuilder<T> implements
 				apiscolInstanceName, resourceId);
 	}
 
-	protected String getResourceScormUri(UriInfo uriInfo, String resourceId) {
+	protected String getResourceScormUri(URI baseUri, String resourceId) {
 		return String.format("%s?format=scorm",
-				getResourceUri(uriInfo, resourceId));
+				getResourceUri(baseUri, resourceId));
 	}
 
-	protected final String getResourceAtomXMLUri(UriInfo uriInfo,
-			String resourceId) {
+	protected final String getResourceAtomXMLUri(URI baseuri, String resourceId) {
 		return String.format("%s?format=xml",
-				getResourceUri(uriInfo, resourceId));
+				getResourceUri(baseuri, resourceId));
 	}
 
-	protected final String getResourceThumbsUri(UriInfo uriInfo,
-			String resourceId) {
-		return String.format("%s/thumbs", getResourceUri(uriInfo, resourceId));
+	protected final String getResourceThumbsUri(URI baseUri, String resourceId) {
+		return String.format("%s/thumbs", getResourceUri(baseUri, resourceId));
 	}
 
-	protected final String getResourcePreviewUri(UriInfo uriInfo,
-			String resourceId) {
+	protected final String getResourcePreviewUri(URI baseUri, String resourceId) {
 		return String.format("%s/index.html",
-				getResourcePreviewDirectoryUri(uriInfo, resourceId));
+				getResourcePreviewDirectoryUri(baseUri, resourceId));
 	}
 
 	@Override
-	public String getResourcePreviewDirectoryUri(UriInfo uriInfo,
-			String resourceId) {
-		return String.format("%spreviews%s", uriInfo.getBaseUri().toString(),
+	public String getResourcePreviewDirectoryUri(URI baseUri, String resourceId) {
+		return String.format("%s/previews%s", baseUri.toString(),
 				FileUtils.getFilePathHierarchy("", resourceId));
 	}
 
-	protected final String getResourceHTMLUri(UriInfo uriInfo, String resourceId) {
-		return getResourceUri(uriInfo, resourceId);
+	protected final String getResourceHTMLUri(URI baseUri, String resourceId) {
+		return getResourceUri(baseUri, resourceId);
 	}
 
 	protected final String getResourceEditUri(String editUri, String resourceId) {
@@ -118,16 +114,14 @@ public abstract class AbstractRepresentationBuilder<T> implements
 		return String.format("%stransfer", editUri, resourceId);
 	}
 
-	private final String getResourceUri(UriInfo uriInfo, String resourceId) {
-		return String.format("%sresource/%s", uriInfo.getBaseUri().toString(),
-				resourceId);
+	private final String getResourceUri(URI baseUri, String resourceId) {
+		return String.format("%s/resource/%s", baseUri.toString(), resourceId);
 	}
 
-	protected final String getResourceArchiveDownloadUri(UriInfo uriInfo,
+	protected final String getResourceArchiveDownloadUri(URI baseUri,
 			String resourceId) {
-		return String.format("%sresources%s.zip", uriInfo.getBaseUri()
-				.toString(), FileUtils.getFilePathHierarchy("",
-				resourceId.toString()));
+		return String.format("%s/resources%s.zip", baseUri.toString(),
+				FileUtils.getFilePathHierarchy("", resourceId.toString()));
 	}
 
 	protected String getMainFileForResource(String resourceId)
@@ -171,21 +165,15 @@ public abstract class AbstractRepresentationBuilder<T> implements
 		return resourceDataHandler.getUrlForResource(resourceId);
 	}
 
-	@Override
-	public T getLinkUpdateProcedureRepresentation(UriInfo uriInfo) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	protected String getTechnicalLocation(String resourceId,
-			IResourceDataHandler resourceDataHandler, UriInfo uriInfo)
+			IResourceDataHandler resourceDataHandler, URI baseUri)
 			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException {
 		String location = "";
 		if (ContentType.isLink(resourceDataHandler
-				.getScormTypeForResource(resourceId)))
+				.getScormTypeForResource(resourceId))) {
 			location = resourceDataHandler.getUrlForResource(resourceId);
-		else {
+		} else {
 			int nbFiles = ResourceDirectoryInterface.getFileList(resourceId,
 					true).size();
 			if (nbFiles == 0)
@@ -194,9 +182,9 @@ public abstract class AbstractRepresentationBuilder<T> implements
 
 				String fileName = resourceDataHandler
 						.getMainFileForResource(resourceId);
-				location = getFileDownloadUrl(uriInfo, resourceId, fileName);
+				location = getFileDownloadUrl(baseUri, resourceId, fileName);
 			} else
-				location = getResourceArchiveDownloadUri(uriInfo, resourceId);
+				location = getResourceArchiveDownloadUri(baseUri, resourceId);
 		}
 
 		return location;

@@ -1,6 +1,7 @@
 package fr.ac_versailles.crdp.apiscol.content.representations;
 
 import java.awt.Point;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -24,7 +25,6 @@ public class ScormRepresentationBuilder extends
 		AbstractRepresentationBuilder<Document> {
 	public ScormRepresentationBuilder(Map<String, String> dbParams) {
 		super(dbParams);
-		// TODO Auto-generated constructor stub
 	}
 
 	private static final String XMLNS = "http://www.w3.org/2000/xmlns/";
@@ -41,19 +41,19 @@ public class ScormRepresentationBuilder extends
 			+ "http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd";
 
 	@Override
-	public Document getResourceRepresentation(UriInfo uriInfo,
+	public Document getResourceRepresentation(URI baseUri,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		Document scormRepresentation = createScormXMLDocument();
 		scormRepresentation.getDocumentElement().setAttribute("id",
 				getResourceUrn(resourceId, apiscolInstanceName));
-		addXMLSubTreeForResource(scormRepresentation, uriInfo,
+		addXMLSubTreeForResource(scormRepresentation, baseUri,
 				apiscolInstanceName, resourceId);
 		return scormRepresentation;
 	}
 
-	private void addXMLSubTreeForResource(Document XMLDocument,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId)
+	private void addXMLSubTreeForResource(Document XMLDocument, URI baseUri,
+			String apiscolInstanceName, String resourceId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		Element resourcesElement = XMLDocument.createElement("resources");
 		Element resourceElement = XMLDocument.createElement("resource");
@@ -101,7 +101,6 @@ public class ScormRepresentationBuilder extends
 		try {
 			docBuilder = docFactory.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Document scormManifest = docBuilder.newDocument();
@@ -137,23 +136,20 @@ public class ScormRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getFileSuccessfulDestructionReport(UriInfo uriInfo,
+	public Document getFileSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String fileName) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+	public Document getInexistentFileDestructionAttemptReport(URI baseUri,
 			String resourceId, String fileName) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getCompleteResourceListRepresentation(UriInfo uriInfo,
+	public Document getCompleteResourceListRepresentation(URI baseUri,
 			String apiscolInstanceName, int start, int rows, String editUri) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -163,67 +159,65 @@ public class ScormRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceStringRepresentation(UriInfo uriInfo,
+	public String getResourceStringRepresentation(URI baseUri,
 			String apiscolInstanceName, String string, String editUri) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document selectResourceFollowingCriterium(UriInfo uriInfo,
+	public Document selectResourceFollowingCriterium(URI baseUri,
 			String apiscolInstanceName, ISearchEngineResultHandler handler,
 			int start, int rows, String editUri) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+	public Document getResourceSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+	public Document getResourceUnsuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getSuccessfullOptimizationReport(UriInfo uriInfo) {
-		// TODO Auto-generated method stub
+	public Document getSuccessfullOptimizationReport(URI baseUri,
+			UriInfo uriInfo) {
 		return null;
 	}
 
 	@Override
 	public Document getSuccessfulGlobalDeletionReport() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getResourceTechnicalInformations(UriInfo uriInfo,
+	public Document getResourceTechnicalInformations(URI baseUri,
 			String apiscolInstanceName, String resourceId) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Document getThumbListRepresentation(String resourceId,
-			Map<String, Point> thumbsUris, UriInfo uriInfo,
+			Map<String, Point> thumbsUris, URI baseUri,
 			String apiscolInstanceName, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Object getRefreshProcessRepresentation(
-			Integer refreshProcessIdentifier, UriInfo uriInfo,
+			Integer refreshProcessIdentifier, URI baseUri,
 			RefreshProcessRegistry refreshProcessRegistry) {
-		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Document getLinkUpdateProcedureRepresentation(URI baseUri,
+			UriInfo uriInfo) {
 		return null;
 	}
 

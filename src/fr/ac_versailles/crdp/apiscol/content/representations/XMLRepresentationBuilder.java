@@ -2,6 +2,7 @@ package fr.ac_versailles.crdp.apiscol.content.representations;
 
 import java.awt.Point;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -49,12 +51,12 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceRepresentation(UriInfo uriInfo,
+	public Document getResourceRepresentation(URI baseUri,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		Document XMLRepresentation = XMLUtils.createXMLDocument();
 
-		addXMLSubTreeForResource(XMLRepresentation, XMLRepresentation, uriInfo,
+		addXMLSubTreeForResource(XMLRepresentation, XMLRepresentation, baseUri,
 				apiscolInstanceName, resourceId, editUri);
 		XMLUtils.addNameSpaces(XMLRepresentation, UsedNamespaces.ATOM);
 		return XMLRepresentation;
@@ -121,7 +123,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	private long addXMLSubTreeForResource(Document XMLDocument,
-			Node insertionElement, UriInfo uriInfo, String apiscolInstanceName,
+			Node insertionElement, URI baseUri, String apiscolInstanceName,
 			String resourceId, String editUri) throws DBAccessException,
 			InexistentResourceInDatabaseException {
 		ContentType type = getResourceType(resourceId);
@@ -177,25 +179,25 @@ public class XMLRepresentationBuilder extends
 		selfHTMLLinkElement.setAttribute("rel", "self");
 		selfHTMLLinkElement.setAttribute("type", "text/html");
 		selfHTMLLinkElement.setAttribute("href",
-				getResourceHTMLUri(uriInfo, resourceId));
+				getResourceHTMLUri(baseUri, resourceId));
 		rootElement.appendChild(selfHTMLLinkElement);
 		Element selfAtomXMLLinkElement = XMLDocument.createElement("link");
 		selfAtomXMLLinkElement.setAttribute("rel", "self");
 		selfAtomXMLLinkElement.setAttribute("type", "application/atom+xml");
 		selfAtomXMLLinkElement.setAttribute("href",
-				getResourceAtomXMLUri(uriInfo, resourceId));
+				getResourceAtomXMLUri(baseUri, resourceId));
 		rootElement.appendChild(selfAtomXMLLinkElement);
 		Element selfThumbLinkElement = XMLDocument.createElement("link");
 		selfThumbLinkElement.setAttribute("rel", "icon");
 		selfThumbLinkElement.setAttribute("type", "application/atom+xml");
 		selfThumbLinkElement.setAttribute("href",
-				getResourceThumbsUri(uriInfo, resourceId));
+				getResourceThumbsUri(baseUri, resourceId));
 		rootElement.appendChild(selfThumbLinkElement);
 		Element selfPreviewLinkElement = XMLDocument.createElement("link");
 		selfPreviewLinkElement.setAttribute("rel", "preview");
 		selfPreviewLinkElement.setAttribute("type", "text/html");
 		selfPreviewLinkElement.setAttribute("href",
-				getResourcePreviewUri(uriInfo, resourceId));
+				getResourcePreviewUri(baseUri, resourceId));
 		rootElement.appendChild(selfPreviewLinkElement);
 		if (type.equals(ContentType.url)) {
 			Element urlElement = XMLDocument.createElement("content");
@@ -220,7 +222,7 @@ public class XMLRepresentationBuilder extends
 			try {
 				it = getFileList(resourceId).iterator();
 				while (it.hasNext()) {
-					addXMLSubTreeForFile(XMLDocument, filesElement, uriInfo,
+					addXMLSubTreeForFile(XMLDocument, filesElement, baseUri,
 							apiscolInstanceName, resourceId, it.next());
 				}
 			} catch (ResourceDirectoryNotFoundException e) {
@@ -241,7 +243,7 @@ public class XMLRepresentationBuilder extends
 						.createElement("apiscol:archive");
 				downloadLinkElement.setAttribute("type", "application/zip");
 				downloadLinkElement.setAttribute("src",
-						getResourceArchiveDownloadUri(uriInfo, resourceId));
+						getResourceArchiveDownloadUri(baseUri, resourceId));
 				xmlContentElement.appendChild(downloadLinkElement);
 			}
 
@@ -251,7 +253,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	private void addXMLSubTreeForFile(Document document, Node insertionNode,
-			UriInfo uriInfo, String apiscolInstanceName, String resourceId,
+			URI baseUri, String apiscolInstanceName, String resourceId,
 			String fileName) {
 		Element rootElement = document.createElement("apiscol:file");
 		insertionNode.appendChild(rootElement);
@@ -260,7 +262,7 @@ public class XMLRepresentationBuilder extends
 		Element downloadLinkElement = document.createElement("link");
 		downloadLinkElement.setAttribute("rel", "self");
 		downloadLinkElement.setAttribute("href",
-				getFileDownloadUrl(uriInfo, resourceId, fileName));
+				getFileDownloadUrl(baseUri, resourceId, fileName));
 		downloadLinkElement.setAttribute("type", "application/octet-stream");
 		nameElement.setTextContent(fileName);
 		rootElement.appendChild(nameElement);
@@ -268,7 +270,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getFileSuccessfulDestructionReport(UriInfo uriInfo,
+	public Document getFileSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String fileName) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
@@ -277,7 +279,7 @@ public class XMLRepresentationBuilder extends
 		Element linkElement = report.createElementNS(
 				UsedNamespaces.ATOM.getUri(), "link");
 		linkElement.setAttribute("href",
-				getFileDownloadUrl(uriInfo, resourceId, fileName));
+				getFileDownloadUrl(baseUri, resourceId, fileName));
 		Element messageElement = report.createElement("message");
 		messageElement.setTextContent("File deleted");
 		rootElement.appendChild(stateElement);
@@ -288,7 +290,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+	public Document getResourceSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
@@ -300,7 +302,7 @@ public class XMLRepresentationBuilder extends
 		Element linkElement = report.createElementNS(
 				UsedNamespaces.ATOM.getUri(), "link");
 		linkElement.setAttribute("href",
-				getResourceAtomXMLUri(uriInfo, resourceId));
+				getResourceAtomXMLUri(baseUri, resourceId));
 		Element messageElement = report.createElement("message");
 		messageElement.setTextContent("Resource deleted " + warnings);
 		rootElement.appendChild(stateElement);
@@ -312,7 +314,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+	public Document getResourceUnsuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
@@ -321,7 +323,7 @@ public class XMLRepresentationBuilder extends
 		Element linkElement = report.createElementNS(
 				UsedNamespaces.ATOM.getUri(), "link");
 		linkElement.setAttribute("href",
-				getResourceArchiveDownloadUri(uriInfo, resourceId));
+				getResourceArchiveDownloadUri(baseUri, resourceId));
 		Element messageElement = report.createElement("message");
 		messageElement.setTextContent("Resource not deleted " + warnings);
 		rootElement.appendChild(stateElement);
@@ -332,14 +334,13 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+	public Document getInexistentFileDestructionAttemptReport(URI baseUri,
 			String resourceId, String fileName) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document getCompleteResourceListRepresentation(UriInfo uriInfo,
+	public Document getCompleteResourceListRepresentation(URI baseUri,
 			String apiscolInstanceName, int start, int rows, String editUri)
 			throws Exception {
 		ArrayList<String> resourcesList = getResourcesList();
@@ -351,7 +352,7 @@ public class XMLRepresentationBuilder extends
 		rootElement.appendChild(idElement);
 		Element updatedElement = response.createElement("updated");
 		rootElement.appendChild(updatedElement);
-		idElement.setTextContent(uriInfo.getBaseUri().toString());
+		idElement.setTextContent(baseUri.toString());
 		Element totalElement = response.createElement(UsedNamespaces.OPENSEARCH
 				.getShortHand() + ":totalResults");
 		totalElement.setTextContent(Integer.toString(resourcesList.size()));
@@ -381,7 +382,7 @@ public class XMLRepresentationBuilder extends
 				maxTime = (int) Math.max(
 						maxTime,
 						addXMLSubTreeForResource(response, rootElement,
-								uriInfo, apiscolInstanceName, resourceId,
+								baseUri, apiscolInstanceName, resourceId,
 								editUri));
 			} catch (InexistentResourceInDatabaseException e) {
 				logger.error(String
@@ -404,10 +405,10 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceStringRepresentation(UriInfo uriInfo,
+	public String getResourceStringRepresentation(URI baseUri,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		return formatXML((Document) getResourceRepresentation(uriInfo,
+		return formatXML((Document) getResourceRepresentation(baseUri,
 				apiscolInstanceName, resourceId, editUri));
 	}
 
@@ -420,20 +421,18 @@ public class XMLRepresentationBuilder extends
 		try {
 			transformer = tf.newTransformer();
 		} catch (TransformerConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try {
 			transformer.transform(domSource, result);
 		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return writer.toString();
 	}
 
 	@Override
-	public Document selectResourceFollowingCriterium(UriInfo uriInfo,
+	public Document selectResourceFollowingCriterium(URI baseUri,
 			String apiscolInstanceName, ISearchEngineResultHandler handler,
 			int start, int rows, String editUri) throws DBAccessException {
 		Document response = XMLUtils.createXMLDocument();
@@ -442,7 +441,7 @@ public class XMLRepresentationBuilder extends
 		Element idElement = response.createElement("id");
 		resourcesElement.appendChild(titleElement);
 		resourcesElement.appendChild(idElement);
-		idElement.setTextContent(uriInfo.getBaseUri().toString());
+		idElement.setTextContent(baseUri.toString());
 		Element updatedElement = response.createElement("updated");
 		resourcesElement.appendChild(updatedElement);
 		Element hitsElement = response.createElement("apiscol:hits");
@@ -482,7 +481,7 @@ public class XMLRepresentationBuilder extends
 					maxTime = Math.max(
 							maxTime,
 							addXMLSubTreeForResource(response,
-									resourcesElement, uriInfo,
+									resourcesElement, baseUri,
 									apiscolInstanceName, resourceId, editUri));
 					addXMLSubTreeForResult(response, hitsElement, resourceId,
 							fileName, score, type, snippets,
@@ -508,15 +507,15 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getSuccessfullOptimizationReport(UriInfo uriInfo) {
+	public Document getSuccessfullOptimizationReport(URI baseUri,
+			UriInfo uriInfo) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
 		Element stateElement = report.createElement("state");
 		stateElement.setTextContent("done");
 		Element linkElement = report.createElementNS(
 				UsedNamespaces.ATOM.getUri(), "link");
-		linkElement.setAttribute("href",
-				uriInfo.getBaseUri() + uriInfo.getPath());
+		linkElement.setAttribute("href", baseUri + uriInfo.getPath());
 		Element messageElement = report.createElement("message");
 		messageElement.setTextContent("Search engine index has been optimized");
 		rootElement.appendChild(stateElement);
@@ -527,7 +526,8 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getLinkUpdateProcedureRepresentation(UriInfo uriInfo) {
+	public Document getLinkUpdateProcedureRepresentation(URI baseUri,
+			UriInfo uriInfo) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("status");
 		Element stateElement = report.createElement("state");
@@ -544,8 +544,8 @@ public class XMLRepresentationBuilder extends
 		stateElement.setTextContent(state);
 		Element linkElement = report.createElementNS(
 				UsedNamespaces.ATOM.getUri(), "link");
-		linkElement.setAttribute("href",
-				uriInfo.getBaseUri() + uriInfo.getPath());
+		linkElement
+				.setAttribute("href", baseUri.toString() + uriInfo.getPath());
 		rootElement.appendChild(stateElement);
 		rootElement.appendChild(linkElement);
 		if (LinkRefreshingHandler.getInstance().getCurrentState() == State.RUNNING) {
@@ -601,12 +601,12 @@ public class XMLRepresentationBuilder extends
 
 	@Override
 	public Document getThumbListRepresentation(String resourceId,
-			Map<String, Point> thumbsUris, UriInfo uriInfo,
+			Map<String, Point> thumbsUris, URI baseUri,
 			String apiscolInstanceName, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		Document list = XMLUtils.createXMLDocument();
 		Element rootElement = list.createElement("apiscol:thumbs");
-		addXMLSubTreeForResource(list, rootElement, uriInfo,
+		addXMLSubTreeForResource(list, rootElement, baseUri,
 				apiscolInstanceName, resourceId, editUri);
 		Iterator<String> it = thumbsUris.keySet().iterator();
 		while (it.hasNext()) {
@@ -631,7 +631,7 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
-	public Document getResourceTechnicalInformations(UriInfo uriInfo,
+	public Document getResourceTechnicalInformations(URI baseUri,
 			String apiscolInstanceName, String resourceId)
 			throws ResourceDirectoryNotFoundException, DBAccessException,
 			InexistentResourceInDatabaseException {
@@ -649,7 +649,7 @@ public class XMLRepresentationBuilder extends
 		metadataElement.setTextContent(getMetadataUri(resourceId));
 		Element previewElement = infos.createElement("preview");
 		previewElement
-				.setTextContent(getResourcePreviewUri(uriInfo, resourceId));
+				.setTextContent(getResourcePreviewUri(baseUri, resourceId));
 		rootElement.appendChild(metadataElement);
 		rootElement.appendChild(sizeElement);
 		rootElement.appendChild(languageElement);
@@ -668,11 +668,11 @@ public class XMLRepresentationBuilder extends
 				resourceDataHandler));
 		formatElement.setTextContent(getMimeType(resourceId,
 				resourceDataHandler));
-		locationElement.setTextContent(getResourceAtomXMLUri(uriInfo,
+		locationElement.setTextContent(getResourceAtomXMLUri(baseUri,
 				resourceId));
 
 		technicalLocationElement.setTextContent(getTechnicalLocation(
-				resourceId, resourceDataHandler, uriInfo));
+				resourceId, resourceDataHandler, baseUri));
 		apiscolInstanceElement.setTextContent(apiscolInstanceName);
 		infos.appendChild(rootElement);
 		XMLUtils.addNameSpaces(infos, UsedNamespaces.APISCOL);
@@ -681,7 +681,7 @@ public class XMLRepresentationBuilder extends
 
 	@Override
 	public Document getRefreshProcessRepresentation(
-			Integer refreshProcessIdentifier, UriInfo uriInfo,
+			Integer refreshProcessIdentifier, URI baseUri,
 			RefreshProcessRegistry refreshProcessRegistry) {
 		Document report = XMLUtils.createXMLDocument();
 		Element rootElement = report.createElement("apiscol:status");
@@ -694,7 +694,7 @@ public class XMLRepresentationBuilder extends
 		Element linkElement = report.createElement("link");
 		linkElement.setAttribute(
 				"href",
-				getUrlForRefreshProcess(uriInfo.getBaseUriBuilder(),
+				getUrlForRefreshProcess(UriBuilder.fromUri(baseUri),
 						resourceId, refreshProcessIdentifier).toString());
 		linkElement.setAttribute("rel", "self");
 		linkElement.setAttribute("type", "application/atom+xml");
@@ -707,7 +707,7 @@ public class XMLRepresentationBuilder extends
 		Element resourceLinkElement = report.createElement("link");
 
 		resourceLinkElement.setAttribute("href",
-				getResourceHTMLUri(uriInfo, resourceId));
+				getResourceHTMLUri(baseUri, resourceId));
 		resourceLinkElement.setAttribute("rel", "item");
 		resourceLinkElement.setAttribute("type", "application/atom+xml");
 		rootElement.appendChild(resourceLinkElement);

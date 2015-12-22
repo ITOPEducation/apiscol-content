@@ -31,13 +31,14 @@ import com.sun.jersey.multipart.FormDataMultiPart;
 import fr.ac_versailles.crdp.apiscol.ParametersKeys;
 import fr.ac_versailles.crdp.apiscol.UsedNamespaces;
 import fr.ac_versailles.crdp.apiscol.content.ResourceApi;
+import fr.ac_versailles.crdp.apiscol.restClient.LanWebResource;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 public class ConversionServerInterface {
 
 	private static Logger logger;
 	private static Client client;
-	private static WebResource conversionWebServiceResource;
+	private static LanWebResource conversionWebServiceResource;
 	private static boolean initialized = false;
 
 	public static List<String> askForConversion(String filePath,
@@ -48,12 +49,12 @@ public class ConversionServerInterface {
 
 		form.field("output-mime-types", jsonMimeTypesList).field("page-limit",
 				"10");
-		if (file.exists())
+		if (file.exists()) {
 			form.field("file", file, MediaType.MULTIPART_FORM_DATA_TYPE).field(
 					"fname", file.getName());
-		else
-			// TODO check that it is a valid uri
+		} else {
 			form.field("fname", filePath);
+		}
 		ClientResponse previewsWebServiceResponse;
 		try {
 			previewsWebServiceResponse = conversionWebServiceResource
@@ -208,14 +209,14 @@ public class ConversionServerInterface {
 		URI conversionWebserviceUrl = null;
 		try {
 			conversionWebserviceUrl = new URI(ResourceApi.getProperty(
-					ParametersKeys.conversionWebserviceUrl, context));
+					ParametersKeys.previewsWebserviceLanUrl, context));
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		conversionWebServiceResource = client.resource(UriBuilder.fromUri(
-				conversionWebserviceUrl).build());
+		conversionWebServiceResource = new LanWebResource(
+				client.resource(UriBuilder.fromUri(conversionWebserviceUrl)
+						.build()));
 		initialized = true;
 
 	}

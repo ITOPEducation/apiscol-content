@@ -319,9 +319,13 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 			}
 		}
 		if (StringUtils.isBlank(url))
+			{
 			resource.removeField(DBKeys.url.toString());
+			}
 		else
+			{
 			resource.put(DBKeys.url.toString(), url);
+			}
 		try {
 			saveAndUpdateLastModified(resource);
 		} catch (MongoException e) {
@@ -455,7 +459,9 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 	public String getResourceIdByMetadataId(String metadataId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		BasicDBObject query = new BasicDBObject();
-		query.put(DBKeys.metadata.toString(), metadataId);
+		String idPart = metadataId.substring(metadataId.lastIndexOf('/')+1);
+		query.put(DBKeys.metadata.toString(), new BasicDBObject("$regex",
+				String.format(".*%s$", idPart)));
 		DBObject resource = null;
 		try {
 			resource = resourcesCollection.findOne(query);
@@ -469,13 +475,13 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 		if (resource == null) {
 			logger.warn(String
 					.format("Tried to fetch resource with metadata %s from database, but it doesn't exist",
-							metadataId));
+							idPart));
 			// TODO correspond pas exactement
 			throw new InexistentResourceInDatabaseException(
 					String.format(
-							"Asked content ws database for resource width metadata %s. But there is no entry for this resource."
+							"Asked content ws database for resource width metadata id %s. But there is no entry for this resource."
 									+ "Your data must be in inconsistent state or you did not provide a resource for this metadata document.",
-							metadataId));
+							idPart));
 		}
 		return resource.get(DBKeys.id.toString()).toString();
 	}

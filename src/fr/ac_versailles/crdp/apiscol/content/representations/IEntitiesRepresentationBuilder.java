@@ -1,7 +1,7 @@
 package fr.ac_versailles.crdp.apiscol.content.representations;
 
 import java.awt.Point;
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -15,57 +15,56 @@ import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseExcept
 
 public interface IEntitiesRepresentationBuilder<T> {
 
-	T getResourceRepresentation(UriInfo uriInfo, String apiscolInstanceName,
+	T getResourceRepresentation(URI baseUri, String apiscolInstanceName,
 			String resourceId, String editUri) throws DBAccessException,
 			InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException;
 
-	String getResourceStringRepresentation(UriInfo uriInfo,
+	String getResourceStringRepresentation(URI baseUri,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException;
 
-	T getFileSuccessfulDestructionReport(UriInfo uriInfo,
+	T getFileSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String fileName);
 
-	T getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
-			String resourceId, String fileName);
+	T getInexistentFileDestructionAttemptReport(URI baseuri, String resourceId,
+			String fileName);
 
-	T getCompleteResourceListRepresentation(UriInfo uriInfo,
+	T getCompleteResourceListRepresentation(URI baseUri,
 			String apiscolInstanceName, int start, int rows, String editUri)
 			throws DBAccessException, Exception;
 
-	T selectResourceFollowingCriterium(UriInfo uriInfo,
-			String apiscolInstanceName, ISearchEngineResultHandler handler,
-			int start, int rows, String editUri) throws DBAccessException;
+	T selectResourceFollowingCriterium(URI baseUri, String apiscolInstanceName,
+			ISearchEngineResultHandler handler, int start, int rows,
+			String editUri) throws DBAccessException;
 
 	MediaType getMediaType();
 
-	T getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+	T getResourceSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings);
 
-	T getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+	T getResourceUnsuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings);
 
-	T getSuccessfullOptimizationReport(UriInfo uriInfo);
+	T getSuccessfullOptimizationReport(URI baseUri, UriInfo uriInfo);
 
-	T getLinkUpdateProcedureRepresentation(UriInfo uriInfo);
+	T getLinkUpdateProcedureRepresentation(URI baseUri, UriInfo uriInfo);
 
 	T getSuccessfulGlobalDeletionReport();
 
 	T getThumbListRepresentation(String resourceId,
-			Map<String, Point> thumbsUris, UriInfo uriInfo,
+			Map<String, Point> thumbsUris, URI baseUri,
 			String apiscolInstanceName, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException;
 
-	T getResourceTechnicalInformations(UriInfo uriInfo,
-			String apiscolInstanceName, String resourceId)
-			throws ResourceDirectoryNotFoundException, DBAccessException,
-			InexistentResourceInDatabaseException;
+	T getResourceTechnicalInformations(URI baseUri, String apiscolInstanceName,
+			String resourceId) throws ResourceDirectoryNotFoundException,
+			DBAccessException, InexistentResourceInDatabaseException;
 
-	String getResourcePreviewDirectoryUri(UriInfo uriInfo, String resourceId);
+	String getResourcePreviewDirectoryUri(URI baseUri, String resourceId);
 
 	Object getRefreshProcessRepresentation(Integer refreshProcessIdentifier,
-			UriInfo uriInfo, RefreshProcessRegistry refreshProcessRegistry);
+			URI baseUri, RefreshProcessRegistry refreshProcessRegistry);
 
 }

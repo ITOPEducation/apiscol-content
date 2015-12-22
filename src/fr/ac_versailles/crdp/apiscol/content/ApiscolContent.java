@@ -7,9 +7,6 @@ import javax.ws.rs.core.Application;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
-import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
-import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 
 public class ApiscolContent extends ServletContainer {
 

@@ -120,7 +120,8 @@ public class MaintenanceApi extends ApiscolApi {
 				.getRepresentationBuilder(requestedFormat, context,
 						getDbConnexionParameters());
 		searchEngineQueryHandler.processOptimizationQuery();
-		return Response.ok(rb.getSuccessfullOptimizationReport(uriInfo),
+		return Response.ok(
+				rb.getSuccessfullOptimizationReport(getExternalUri(), uriInfo),
 				rb.getMediaType()).build();
 	}
 
@@ -164,9 +165,10 @@ public class MaintenanceApi extends ApiscolApi {
 			logger.info(String
 					.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
-		return Response.ok()
-				.entity(rb.getLinkUpdateProcedureRepresentation(uriInfo))
-				.build();
+		return Response
+				.ok()
+				.entity(rb.getLinkUpdateProcedureRepresentation(
+						getExternalUri(), uriInfo)).build();
 	}
 
 	@GET
@@ -183,9 +185,10 @@ public class MaintenanceApi extends ApiscolApi {
 		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
 				.getRepresentationBuilder(requestedFormat, context,
 						getDbConnexionParameters());
-		return Response.ok()
-				.entity(rb.getLinkUpdateProcedureRepresentation(uriInfo))
-				.build();
+		return Response
+				.ok()
+				.entity(rb.getLinkUpdateProcedureRepresentation(
+						getExternalUri(), uriInfo)).build();
 	}
 
 	@POST

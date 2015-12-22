@@ -2,6 +2,7 @@ package fr.ac_versailles.crdp.apiscol.content.representations;
 
 import java.awt.Point;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
@@ -24,19 +25,19 @@ public class XHTMLRepresentationBuilder extends
 	public XHTMLRepresentationBuilder(Map<String, String> dbParams) {
 		super(dbParams);
 		innerBuilder = new XMLRepresentationBuilder(dbParams);
-		
+
 	}
 
 	private AbstractRepresentationBuilder<Document> innerBuilder;
 
 	@Override
-	public String getLinkUpdateProcedureRepresentation(UriInfo uriInfo) {
-		// TODO Auto-generated method stub
+	public String getLinkUpdateProcedureRepresentation(URI baseUri,
+			UriInfo uriInfo) {
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getResourceRepresentation(UriInfo uriInfo,
+	public String getResourceRepresentation(URI baseUri,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException {
@@ -46,12 +47,12 @@ public class XHTMLRepresentationBuilder extends
 			logger.error("Impossible de charger la feuille de transformation xsl");
 		}
 		return HTMLUtils.WrapInHTML5Headers((Document) XMLUtils.xsltTransform(
-				xslStream, innerBuilder.getResourceRepresentation(uriInfo,
+				xslStream, innerBuilder.getResourceRepresentation(baseUri,
 						apiscolInstanceName, resourceId, editUri)));
 	}
 
 	@Override
-	public String getCompleteResourceListRepresentation(UriInfo uriInfo,
+	public String getCompleteResourceListRepresentation(URI baseUri,
 			String apiscolInstanceName, int start, int rows, String editUri)
 			throws Exception {
 		InputStream xslStream = ResourcesLoader
@@ -61,12 +62,12 @@ public class XHTMLRepresentationBuilder extends
 		}
 		return HTMLUtils.WrapInHTML5Headers((Document) XMLUtils.xsltTransform(
 				xslStream, (Document) innerBuilder
-						.getCompleteResourceListRepresentation(uriInfo,
+						.getCompleteResourceListRepresentation(baseUri,
 								apiscolInstanceName, start, rows, editUri)));
 	}
 
 	@Override
-	public String selectResourceFollowingCriterium(UriInfo uriInfo,
+	public String selectResourceFollowingCriterium(URI baseUri,
 			String apiscolInstanceName, ISearchEngineResultHandler handler,
 			int start, int rows, String editUri) throws DBAccessException {
 		InputStream xslStream = ResourcesLoader
@@ -76,7 +77,7 @@ public class XHTMLRepresentationBuilder extends
 		}
 		return HTMLUtils.WrapInHTML5Headers((Document) XMLUtils.xsltTransform(
 				xslStream, innerBuilder.selectResourceFollowingCriterium(
-						uriInfo, apiscolInstanceName, handler, start, rows,
+						baseUri, apiscolInstanceName, handler, start, rows,
 						editUri)));
 	}
 
@@ -86,77 +87,67 @@ public class XHTMLRepresentationBuilder extends
 	}
 
 	@Override
-	public String getResourceStringRepresentation(UriInfo uriInfo,
+	public String getResourceStringRepresentation(URI baseUri,
 			String apiscolInstanceName, String resourceId, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException,
 			ResourceDirectoryNotFoundException {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getFileSuccessfulDestructionReport(UriInfo uriInfo,
+	public String getFileSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String fileName) {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getInexistentFileDestructionAttemptReport(UriInfo uriInfo,
+	public String getInexistentFileDestructionAttemptReport(URI baseUri,
 			String resourceId, String fileName) {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getResourceSuccessfulDestructionReport(UriInfo uriInfo,
+	public String getResourceSuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings) {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getResourceUnsuccessfulDestructionReport(UriInfo uriInfo,
+	public String getResourceUnsuccessfulDestructionReport(URI baseUri,
 			String apiscolInstanceName, String resourceId, String warnings) {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getSuccessfullOptimizationReport(UriInfo uriInfo) {
-		// TODO Auto-generated method stub
+	public String getSuccessfullOptimizationReport(URI baseUri, UriInfo uriInfo) {
 		return "not yet implemented";
 	}
 
 	@Override
 	public String getSuccessfulGlobalDeletionReport() {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
 	public String getThumbListRepresentation(String resourceId,
-			Map<String, Point> thumbsUris, UriInfo uriInfo,
+			Map<String, Point> thumbsUris, URI baseUri,
 			String apiscolInstanceName, String editUri)
 			throws DBAccessException, InexistentResourceInDatabaseException {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
-	public String getResourceTechnicalInformations(UriInfo uriInfo,
+	public String getResourceTechnicalInformations(URI baseUri,
 			String apiscolInstanceName, String resourceId)
 			throws ResourceDirectoryNotFoundException, DBAccessException,
 			InexistentResourceInDatabaseException {
-		// TODO Auto-generated method stub
 		return "not yet implemented";
 	}
 
 	@Override
 	public Object getRefreshProcessRepresentation(
-			Integer refreshProcessIdentifier, UriInfo uriInfo,
+			Integer refreshProcessIdentifier, URI baseUri,
 			RefreshProcessRegistry refreshProcessRegistry) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
