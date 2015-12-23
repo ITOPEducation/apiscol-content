@@ -104,14 +104,14 @@ public abstract class AbstractRepresentationBuilder<T> implements
 	}
 
 	protected final String getResourceEditUri(String editUri, String resourceId) {
-		return String.format("%sresource/%s", editUri, resourceId);
+		return String.format("%s/resource/%s", editUri, resourceId);
 	}
 
 	protected final String getResourceEditMediaUri(String editUri,
 			String resourceId, ContentType type) {
 		if (type.equals(ContentType.url))
-			return String.format("%surl_parsing", editUri, resourceId);
-		return String.format("%stransfer", editUri, resourceId);
+			return String.format("%s/url_parsing", editUri, resourceId);
+		return String.format("%s/transfer", editUri, resourceId);
 	}
 
 	private final String getResourceUri(URI baseUri, String resourceId) {
