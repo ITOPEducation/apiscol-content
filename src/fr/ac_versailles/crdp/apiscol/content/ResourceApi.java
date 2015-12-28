@@ -1786,8 +1786,9 @@ public class ResourceApi extends ApiscolApi {
 				ResourcesKeySyntax.removeSSL(uriInfo.getBaseUri().toString()),
 				resourceDataHandler.getMainFileForResource(resourceId),
 				minDimensionsSum);
-		thumbsUris.putAll(thumbsExtracter.getThumbsFromPreview(resourceId,
-				previewsRepoPath, uriInfo.getBaseUri().toString()));
+		Map<String, Point> thumbsFromPreview = thumbsExtracter.getThumbsFromPreview(resourceId,
+				previewsRepoPath, uriInfo.getBaseUri().toString());
+		thumbsUris.putAll(thumbsFromPreview);
 		Object response = rb.getThumbListRepresentation(resourceId, thumbsUris,
 				getExternalUri(), apiscolInstanceName, ResourceApi.editUri);
 		return Response.ok(response, rb.getMediaType()).build();

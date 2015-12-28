@@ -36,7 +36,7 @@ public class RemoteResourceSnapshotPreviewMaker extends AbstractPreviewMaker {
 
 		List<String> images = ConversionServerInterface.askForConversion(
 				entryPoint, outputs);
-		if (images == null) {
+		if (images == null || images.size() == 0) {
 			// TODO enregistrer en base l'absence de preview
 			String message = "No preview image obtained from conversion server interface for resource"
 					+ resourceId;
