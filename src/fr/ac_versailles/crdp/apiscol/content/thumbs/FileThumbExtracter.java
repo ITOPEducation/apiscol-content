@@ -77,7 +77,7 @@ public class FileThumbExtracter implements ThumbExtracter {
 	private String getPreviewThumbUrlFromFilePath(String baseUri,
 			String resourceId, String filePath) {
 		return String
-				.format("%spreviews%s",
+				.format("%s/previews%s",
 						baseUri,
 						FileUtils.getFilePathHierarchy("", resourceId + "/"
 								+ filePath));

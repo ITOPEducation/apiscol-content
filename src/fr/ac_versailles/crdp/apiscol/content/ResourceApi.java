@@ -1781,11 +1781,12 @@ public class ResourceApi extends ApiscolApi {
 		logger.info("Thumbextracter : " + thumbsExtracter.getClass().getName());
 		Map<String, Point> thumbsUris = thumbsExtracter.getThumbsFromResource(
 				resourceId, resourceDataHandler,
-				ResourcesKeySyntax.removeSSL(uriInfo.getBaseUri().toString()),
+				ResourcesKeySyntax.removeSSL(getExternalUri().toString()),
 				resourceDataHandler.getMainFileForResource(resourceId),
 				minDimensionsSum);
-		Map<String, Point> thumbsFromPreview = thumbsExtracter.getThumbsFromPreview(resourceId,
-				previewsRepoPath, uriInfo.getBaseUri().toString());
+		Map<String, Point> thumbsFromPreview = thumbsExtracter
+				.getThumbsFromPreview(resourceId, previewsRepoPath,
+						getExternalUri().toString());
 		thumbsUris.putAll(thumbsFromPreview);
 		Object response = rb.getThumbListRepresentation(resourceId, thumbsUris,
 				getExternalUri(), apiscolInstanceName, ResourceApi.editUri);
