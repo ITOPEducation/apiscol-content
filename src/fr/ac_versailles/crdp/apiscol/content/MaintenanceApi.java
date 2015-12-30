@@ -2,9 +2,7 @@ package fr.ac_versailles.crdp.apiscol.content;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -18,12 +16,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.log4j.Logger;
 import org.w3c.dom.DOMException;
 
 import fr.ac_versailles.crdp.apiscol.ApiscolApi;
 import fr.ac_versailles.crdp.apiscol.ParametersKeys;
-import fr.ac_versailles.crdp.apiscol.RequestHandler;
 import fr.ac_versailles.crdp.apiscol.content.crawler.LinkRefreshingHandler;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTypes;
@@ -44,7 +40,6 @@ import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
 import fr.ac_versailles.crdp.apiscol.transactions.KeyLock;
 import fr.ac_versailles.crdp.apiscol.transactions.KeyLockManager;
-import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 @Path("/maintenance")
 public class MaintenanceApi extends ApiscolApi {

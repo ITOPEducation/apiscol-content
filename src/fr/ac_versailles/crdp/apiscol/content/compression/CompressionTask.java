@@ -7,7 +7,6 @@ import org.w3c.dom.Document;
 
 import fr.ac_versailles.crdp.apiscol.content.AsyncProcessTrackingObject;
 import fr.ac_versailles.crdp.apiscol.content.IRefreshProcess;
-import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry;
 import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry.States;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;

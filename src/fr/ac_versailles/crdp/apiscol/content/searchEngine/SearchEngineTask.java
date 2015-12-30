@@ -4,23 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
 
 import fr.ac_versailles.crdp.apiscol.content.AsyncProcessTrackingObject;
 import fr.ac_versailles.crdp.apiscol.content.ContentType;
 import fr.ac_versailles.crdp.apiscol.content.IRefreshProcess;
-import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry;
 import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry.States;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
-import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceSnapshotDirectoryNotFoundException;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;

@@ -486,8 +486,9 @@ public class ResourceDirectoryInterface {
 	private static String readFileAsString(File file)
 			throws FileSystemAccessException {
 		StringBuffer fileData = new StringBuffer(1000);
+		BufferedReader reader = null;
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(file));
+			reader = new BufferedReader(new FileReader(file));
 			char[] buf = new char[1024];
 			int numRead = 0;
 
@@ -499,6 +500,14 @@ public class ResourceDirectoryInterface {
 		} catch (IOException e) {
 			throw new FileSystemAccessException(String.format(
 					"Unable to read from file %s", file.getAbsolutePath()));
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return fileData.toString();
@@ -555,7 +564,6 @@ public class ResourceDirectoryInterface {
 					pointedDir = unzipDir;
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			if (izPdf) {
@@ -658,7 +666,6 @@ public class ResourceDirectoryInterface {
 				BufferedImage image = ImageIO.read(file);
 				point.setLocation(image.getWidth(), image.getHeight());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			String path = baseDir.toURI().relativize(file.toURI()).getPath();

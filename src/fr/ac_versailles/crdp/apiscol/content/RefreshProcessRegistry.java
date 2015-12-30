@@ -3,8 +3,6 @@ package fr.ac_versailles.crdp.apiscol.content;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import fr.ac_versailles.crdp.apiscol.content.RefreshProcessRegistry.States;
-
 public class RefreshProcessRegistry {
 
 	public enum States {

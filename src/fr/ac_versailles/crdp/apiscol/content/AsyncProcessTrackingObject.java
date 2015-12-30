@@ -6,14 +6,10 @@ public class AsyncProcessTrackingObject {
 
 	private String message;
 	private States state;
-	private final Integer identifier;
-	private final IRefreshProcess task;
 	private final String resourceId;
 
 	public AsyncProcessTrackingObject(Integer counter, IRefreshProcess task,
 			String resourceId) {
-		this.identifier = counter;
-		this.task = task;
 		this.resourceId = resourceId;
 		this.state=States.unknown;
 	}

@@ -1,7 +1,6 @@
 package fr.ac_versailles.crdp.apiscol.content.thumbs;
 
 import java.awt.Point;
-import java.util.Collection;
 import java.util.Map;
 
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
