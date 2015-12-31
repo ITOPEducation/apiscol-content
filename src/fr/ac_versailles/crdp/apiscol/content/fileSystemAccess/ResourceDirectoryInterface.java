@@ -806,4 +806,17 @@ public class ResourceDirectoryInterface {
 		return success;
 	}
 
+	public static String downloadRemoteFileInResourceDirectory(
+			String resourceId, String url)
+			throws ResourceDirectoryNotFoundException {
+		File resourceDirectory = getResourceDirectory(resourceId);
+		String fileName = new StringBuilder().append(temporaryFilesPrefix)
+				.append(UUID.randomUUID()).append(".pdf").toString();
+		File destinationFile = new File(resourceDirectory, fileName);
+		boolean success = FileUtils.downloadFileFromURL(url, destinationFile);
+		if (success) {
+			return fileName;
+		}
+		return null;
+	}
 }

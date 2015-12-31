@@ -649,6 +649,8 @@ public class ResourceApi extends ApiscolApi {
 										"The url %s is not acceptable for this reason : %s",
 										url, e1.getMessage()));
 					}
+					//TODO better handle encoding/decoding problem
+					url = url.replace(" ", "%20");
 					UrlChecker.checkUrlSyntax(url);
 					String actualScormType = resourceDataHandler
 							.getScormTypeForResource(resourceId);
@@ -1775,9 +1777,8 @@ public class ResourceApi extends ApiscolApi {
 		logger.info("> Asking for thumb list, file : " + requestedFormat
 				+ " , resource id : " + resourceId + " , scorm type :"
 				+ resourceDataHandler.getScormTypeForResource(resourceId));
-		ThumbExtracter thumbsExtracter = ThumbExtracterFactory
-				.getExtracter(resourceDataHandler
-						.getScormTypeForResource(resourceId));
+		ThumbExtracter thumbsExtracter = ThumbExtracterFactory.getExtracter(
+				resourceDataHandler, resourceId);
 		logger.info("Thumbextracter : " + thumbsExtracter.getClass().getName());
 		Map<String, Point> thumbsUris = thumbsExtracter.getThumbsFromResource(
 				resourceId, resourceDataHandler,

@@ -8,6 +8,7 @@ import java.net.URL;
 public class UrlChecker {
 
 	public static String checkUrlSyntax(String url) throws InvalidUrlException {
+		
 		try {
 			new URL(url);
 		} catch (MalformedURLException e) {

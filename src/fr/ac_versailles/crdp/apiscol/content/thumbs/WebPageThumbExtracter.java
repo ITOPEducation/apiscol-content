@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -12,24 +11,16 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
-import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
-import fr.ac_versailles.crdp.apiscol.content.previews.AbstractPreviewMaker;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
-import fr.ac_versailles.crdp.apiscol.utils.FileUtils;
-import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
-public class WebPageThumbExtracter implements ThumbExtracter {
-	// TODO parameter
-	private static Logger logger;
-
+public class WebPageThumbExtracter extends  AbstractThumbExtracter {
 	public WebPageThumbExtracter() {
 		createLogger();
 	}
@@ -102,48 +93,5 @@ public class WebPageThumbExtracter implements ThumbExtracter {
 		if (image == null)
 			return new Point();
 		return new Point(image.getWidth(), image.getHeight());
-	}
-
-	private boolean imageSizeIsSufficient(Point imageSize,
-			double minDimensionSum) throws InvalidImageException {
-		double width = imageSize.getX();
-		double height = imageSize.getY();
-		return width + height > minDimensionSum;
-	}
-
-	private void createLogger() {
-		if (logger == null)
-			logger = LogUtility
-					.createLogger(this.getClass().getCanonicalName());
-	}
-
-	// TODO factorize
-	@Override
-	public Map<String, Point> getThumbsFromPreview(String resourceId,
-			String previewsRepoPath, String baseUrl) {
-		Map<String, Point> urlList = new HashMap<String, Point>();
-		Map<String, Point> imagesFilePathList = ResourceDirectoryInterface
-				.getImagesInPreviewDirectoryList(AbstractPreviewMaker
-						.buildPreviewsDirectoryPath(previewsRepoPath,
-								resourceId));
-		Iterator<String> it = imagesFilePathList.keySet().iterator();
-		while (it.hasNext()) {
-			String filePath = (String) it.next();
-			Point image = imagesFilePathList.get(filePath);
-			urlList.put(
-					getPreviewThumbUrlFromFilePath(baseUrl, resourceId,
-							filePath), image);
-		}
-		return urlList;
-	}
-
-	// TODO factorize
-	private String getPreviewThumbUrlFromFilePath(String baseUri,
-			String resourceId, String filePath) {
-		return String
-				.format("%s/previews%s",
-						baseUri,
-						FileUtils.getFilePathHierarchy("", resourceId + "/"
-								+ filePath));
 	}
 }
