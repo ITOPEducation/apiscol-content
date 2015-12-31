@@ -46,7 +46,7 @@ public class WebPageThumbExtracter implements ThumbExtracter {
 					.format("The provided url for thumb extraction in content web service for resource %s is void ",
 							resourceId));
 
-			return Collections.emptyMap();
+			return new HashMap<String, Point>();
 		}
 		Document doc = null;
 		try {
@@ -55,10 +55,10 @@ public class WebPageThumbExtracter implements ThumbExtracter {
 			logger.warn(String
 					.format("This is not a valid url for thumb extraction for resource %s in content web service : %s",
 							resourceId, url));
-			return Collections.emptyMap();
+			return new HashMap<String, Point>();
 		}
 		if (doc == null)
-			return Collections.emptyMap();
+			return new HashMap<String, Point>();
 		Elements images = doc.select("img");
 		Iterator<Element> it = images.iterator();
 		while (it.hasNext()) {
@@ -117,7 +117,7 @@ public class WebPageThumbExtracter implements ThumbExtracter {
 					.createLogger(this.getClass().getCanonicalName());
 	}
 
-	//TODO factorize
+	// TODO factorize
 	@Override
 	public Map<String, Point> getThumbsFromPreview(String resourceId,
 			String previewsRepoPath, String baseUrl) {
@@ -137,7 +137,7 @@ public class WebPageThumbExtracter implements ThumbExtracter {
 		return urlList;
 	}
 
-	//TODO factorize
+	// TODO factorize
 	private String getPreviewThumbUrlFromFilePath(String baseUri,
 			String resourceId, String filePath) {
 		return String
