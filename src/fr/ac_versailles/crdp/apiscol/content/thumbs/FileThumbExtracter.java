@@ -32,9 +32,10 @@ public class FileThumbExtracter implements ThumbExtracter {
 				e.printStackTrace();
 				continue;
 			}
+			String resourceThumbUrlFromFilePath = getResourceThumbUrlFromFilePath(baseUrl, resourceId,
+					filePath);
 			urlList.put(
-					getResourceThumbUrlFromFilePath(baseUrl, resourceId,
-							filePath), image);
+					resourceThumbUrlFromFilePath, image);
 		}
 		return urlList;
 	}
@@ -42,7 +43,7 @@ public class FileThumbExtracter implements ThumbExtracter {
 	private String getResourceThumbUrlFromFilePath(String baseUri,
 			String resourceId, String filePath) {
 		return String
-				.format("%sresources%s",
+				.format("%s/resources%s",
 						baseUri,
 						FileUtils.getFilePathHierarchy("", resourceId + "/"
 								+ filePath));
