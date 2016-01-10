@@ -84,7 +84,7 @@ public class ImagePreviewMaker extends AbstractPreviewMaker {
 		} catch (IOException e) {
 			trackingObject.updateStateAndMessage(
 					States.aborted,
-					"Impossible to copye the preview template : "
+					"Impossible to copy the preview template : "
 							+ e.getMessage());
 			e.printStackTrace();
 			return;

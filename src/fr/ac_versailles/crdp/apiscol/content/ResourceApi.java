@@ -49,12 +49,14 @@ import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTy
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.BadFileTypeException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.FileSystemAccessException;
+import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ForcedPreviewInvalidMimeTypeException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.MissingIncomingFileException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.OverWritingExistingFileException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
 import fr.ac_versailles.crdp.apiscol.content.previews.ConversionServerInterface;
 import fr.ac_versailles.crdp.apiscol.content.previews.IPreviewMaker;
+import fr.ac_versailles.crdp.apiscol.content.previews.ImagePreviewMaker;
 import fr.ac_versailles.crdp.apiscol.content.previews.PreviewMakersFactory;
 import fr.ac_versailles.crdp.apiscol.content.representations.AbstractSearchEngineFactory;
 import fr.ac_versailles.crdp.apiscol.content.representations.EntitiesRepresentationBuilderFactory;
@@ -459,10 +461,14 @@ public class ResourceApi extends ApiscolApi {
 							resourceId, request);
 
 				if (updatePreview)
-					refreshProcessIdentifier = updateResourcePreview(
-							resourceId, request, resourceDataHandler,
-							rb.getResourcePreviewDirectoryUri(getExternalUri(),
-									resourceId));
+					try {
+						refreshProcessIdentifier = updateResourcePreview(
+								resourceId, request, resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(
+										getExternalUri(), resourceId), null);
+					} catch (ForcedPreviewInvalidMimeTypeException e) {
+						// impossible. No forced preview here
+					}
 
 				if (updateIndex)
 					refreshProcessIdentifier = updateResourceInSearchEngineIndex(
@@ -649,7 +655,7 @@ public class ResourceApi extends ApiscolApi {
 										"The url %s is not acceptable for this reason : %s",
 										url, e1.getMessage()));
 					}
-					//TODO better handle encoding/decoding problem
+					// TODO better handle encoding/decoding problem
 					url = url.replace(" ", "%20");
 					UrlChecker.checkUrlSyntax(url);
 					String actualScormType = resourceDataHandler
@@ -739,10 +745,107 @@ public class ResourceApi extends ApiscolApi {
 								|| StringUtils.isNotEmpty(mainFileName);
 				}
 				if (previewHasToBeUpdated)
+					try {
+						updateResourcePreview(resourceId, request,
+								resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(
+										getExternalUri(), resourceId), null);
+					} catch (ForcedPreviewInvalidMimeTypeException e) {
+						// impossible. No forced preview here
+					}
+				if (response == null) {
+					if (versionNumberHasToBeUpdated)
+						resourceDataHandler.updateVersionNumber(resourceId);
+					response = Response.ok(
+							rb.getResourceRepresentation(getExternalUri(),
+									apiscolInstanceName, resourceId,
+									ResourceApi.editUri), rb.getMediaType())
+							.header(HttpHeaders.ETAG,
+									getEtatInRFC3339(resourceId,
+											resourceDataHandler));
+				}
+
+			} finally {
+				keyLock.unlock();
+			}
+		} finally {
+			if (keyLock != null) {
+				keyLock.release();
+			}
+			logger.info(String
+					.format("Leaving critical section with mutual exclusion for resource %s",
+							resourceId));
+		}
+
+		return response.build();
+	}
+
+	@PUT
+	@Path("/resource/{resid}/preview")
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
+	public Response forceResourcePreview(@Context HttpServletRequest request,
+			@PathParam(value = "resid") String resourceId,
+			@FormParam(value = "format") final String format,
+			@DefaultValue("") @FormParam("edit_uri") String editUri,
+			@FormParam(value = "image_file_name") final String imageFileName)
+			throws DBAccessException, InexistentResourceInDatabaseException,
+			IncorrectResourceKeySyntaxException, InvalidEtagException,
+			ResourceDirectoryNotFoundException, InvalidUrlException,
+			SearchEngineErrorException, UnknownMediaTypeForResponseException,
+			IllegalResourceTypeChangeException,
+			ForcedPreviewInvalidMimeTypeException {
+		askForGlobalLock();
+		KeyLock keyLock = null;
+		if (ResourcesKeySyntax.isUrn(resourceId))
+			resourceId = ResourcesKeySyntax
+					.extractResourceIdFromUrn(resourceId);
+		checkResidSyntax(resourceId);
+		String requestedFormat = guessRequestedFormat(request, format);
+		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
+				.getRepresentationBuilder(requestedFormat, context,
+						getDbConnexionParameters());
+		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+				.setDbType(DBTypes.mongoDB)
+				.setParameters(getDbConnexionParameters()).build();
+
+		if (StringUtils.isBlank(imageFileName)) {
+			String message = String
+					.format("A preview put request was sent for resource %s with image file name parameter blank",
+							resourceId);
+			logger.warn(message);
+			return Response.status(Response.Status.BAD_REQUEST).entity(message)
+					.build();
+		}
+		ResponseBuilder response = null;
+		try {
+			keyLock = keyLockManager.getLock(resourceId.toString());
+			keyLock.lock();
+			try {
+				logger.info(String
+						.format("Entering critical section with mutual exclusion for resource %s",
+								resourceId));
+				if (!StringUtils.isEmpty(editUri))
+					ResourceApi.editUri = editUri;
+				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
+						resourceDataHandler.getEtagForResource(resourceId));
+				boolean versionNumberHasToBeUpdated = false;
+
+				if (ResourceDirectoryInterface.existsFile(resourceId,
+						imageFileName)) {
 					updateResourcePreview(resourceId, request,
 							resourceDataHandler,
 							rb.getResourcePreviewDirectoryUri(getExternalUri(),
-									resourceId));
+									resourceId), imageFileName);
+					versionNumberHasToBeUpdated = true;
+				} else {
+					String message = String
+							.format("A preview put request was sent for resource %s with an image file name %s parameter but this file is missing in the resource directory",
+									resourceId, imageFileName);
+					logger.warn(message);
+					response = Response.status(422).entity(message);
+				}
+
 				if (response == null) {
 					if (versionNumberHasToBeUpdated)
 						resourceDataHandler.updateVersionNumber(resourceId);
@@ -1010,10 +1113,14 @@ public class ResourceApi extends ApiscolApi {
 				if (updateArchive)
 					updateResourceDownloadableArchive(resourceId, request);
 				if (updatePreview)
-					updateResourcePreview(resourceId, request,
-							resourceDataHandler,
-							rb.getResourcePreviewDirectoryUri(getExternalUri(),
-									resourceId));
+					try {
+						updateResourcePreview(resourceId, request,
+								resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(
+										getExternalUri(), resourceId), null);
+					} catch (ForcedPreviewInvalidMimeTypeException e) {
+						// impossible. No forced preview here
+					}
 			} finally {
 				keyLock.unlock();
 			}
@@ -1103,10 +1210,14 @@ public class ResourceApi extends ApiscolApi {
 				if (updateArchive)
 					updateResourceDownloadableArchive(resourceId, request);
 				if (updatePreview)
-					updateResourcePreview(resourceId, request,
-							resourceDataHandler,
-							rb.getResourcePreviewDirectoryUri(getExternalUri(),
-									resourceId));
+					try {
+						updateResourcePreview(resourceId, request,
+								resourceDataHandler,
+								rb.getResourcePreviewDirectoryUri(
+										getExternalUri(), resourceId), null);
+					} catch (ForcedPreviewInvalidMimeTypeException e) {
+						// impossible. No forced preview here
+					}
 			} finally {
 				keyLock.unlock();
 			}
@@ -1156,9 +1267,11 @@ public class ResourceApi extends ApiscolApi {
 
 	private Integer updateResourcePreview(String resourceId,
 			HttpServletRequest request,
-			IResourceDataHandler resourceDataHandler, String previewUri)
-			throws DBAccessException, InexistentResourceInDatabaseException,
-			ResourceDirectoryNotFoundException {
+			IResourceDataHandler resourceDataHandler, String previewUri,
+			String forcedPreviewImageFileName) throws DBAccessException,
+			InexistentResourceInDatabaseException,
+			ResourceDirectoryNotFoundException,
+			ForcedPreviewInvalidMimeTypeException {
 		// TODO delete previous
 		IPreviewMaker task = null;
 		Integer identifier = -1;
@@ -1167,7 +1280,12 @@ public class ResourceApi extends ApiscolApi {
 				.getScormTypeForResource(resourceId);
 		boolean isRemote = resourceType.equals(ContentType.url.toString());
 		String entryPoint = "";
-		if (isRemote) {
+		if (StringUtils.isNotEmpty(forcedPreviewImageFileName)) {
+			entryPoint = forcedPreviewImageFileName;
+			mimeType = ResourceDirectoryInterface.getMimeType(resourceId,
+					forcedPreviewImageFileName);
+			isRemote = false;
+		} else if (isRemote) {
 			mimeType = MediaType.WILDCARD_TYPE.toString();
 			entryPoint = resourceDataHandler.getUrlForResource(resourceId);
 		} else {
@@ -1179,6 +1297,12 @@ public class ResourceApi extends ApiscolApi {
 		}
 		task = PreviewMakersFactory.getPreviewMaker(mimeType, resourceId,
 				previewsRepoPath, entryPoint, isRemote, previewUri, context);
+		if (StringUtils.isNotEmpty(forcedPreviewImageFileName)) {
+			if (!(task instanceof ImagePreviewMaker)) {
+				throw new ForcedPreviewInvalidMimeTypeException(
+						forcedPreviewImageFileName);
+			}
+		}
 		if (task != null) {
 			synchronized (refreshProcessRegistry) {
 				identifier = refreshProcessRegistry.register(task, resourceId);
@@ -1413,10 +1537,14 @@ public class ResourceApi extends ApiscolApi {
 						}
 					}
 					if (updatePreview)
-						updateResourcePreview(resourceId, request,
-								resourceDataHandler,
-								rb.getResourcePreviewDirectoryUri(
-										getExternalUri(), resourceId));
+						try {
+							updateResourcePreview(resourceId, request,
+									resourceDataHandler,
+									rb.getResourcePreviewDirectoryUri(
+											getExternalUri(), resourceId), null);
+						} catch (ForcedPreviewInvalidMimeTypeException e) {
+							// impossible. No forced preview here
+						}
 				}
 
 			} finally {
