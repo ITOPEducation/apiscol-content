@@ -20,7 +20,7 @@ import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
 
-public class WebPageThumbExtracter extends  AbstractThumbExtracter {
+public class WebPageThumbExtracter extends AbstractThumbExtracter {
 	public WebPageThumbExtracter() {
 		createLogger();
 	}
@@ -82,8 +82,6 @@ public class WebPageThumbExtracter extends  AbstractThumbExtracter {
 		try {
 			image = ImageIO.read(url);
 		} catch (Exception e) {
-
-			e.printStackTrace();
 			String message = String.format(
 					"We were not able to process this image : %s", href);
 			logger.warn("Problem while trying to fetch url for thumb : "
