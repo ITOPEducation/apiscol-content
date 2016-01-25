@@ -53,6 +53,8 @@ public interface IEntitiesRepresentationBuilder<T> {
 
 	T getSuccessfulGlobalDeletionReport();
 
+	T getSuccessfulRecoveryReport(URI baseUri, UriInfo uriInfo);
+
 	T getThumbListRepresentation(String resourceId,
 			Map<String, Point> thumbsUris, URI baseUri,
 			String apiscolInstanceName, String editUri)
@@ -66,5 +68,8 @@ public interface IEntitiesRepresentationBuilder<T> {
 
 	Object getRefreshProcessRepresentation(Integer refreshProcessIdentifier,
 			URI baseUri, RefreshProcessRegistry refreshProcessRegistry);
+
+	Object getRecoveryProcedureRepresentation(URI externalUri, UriInfo uriInfo,
+			Integer nbLines);
 
 }

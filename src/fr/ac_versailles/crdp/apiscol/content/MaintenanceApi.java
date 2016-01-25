@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,6 +28,8 @@ import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.FileSystemAccessException;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
+import fr.ac_versailles.crdp.apiscol.content.recovery.ContentRecoveryHandler;
+import fr.ac_versailles.crdp.apiscol.content.recovery.ContentRecoveryHandler.State;
 import fr.ac_versailles.crdp.apiscol.content.representations.AbstractSearchEngineFactory;
 import fr.ac_versailles.crdp.apiscol.content.representations.EntitiesRepresentationBuilderFactory;
 import fr.ac_versailles.crdp.apiscol.content.representations.IEntitiesRepresentationBuilder;
@@ -231,9 +234,7 @@ public class MaintenanceApi extends ApiscolApi {
 	@POST
 	@Path("/recovery")
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
-	public Response startRecovery(
-			@QueryParam(value = "format") final String format,
-			@Context HttpServletRequest request,
+	public Response startRecovery(@Context HttpServletRequest request,
 			@Context ServletContext context, @Context UriInfo uriInfo)
 			throws Exception {
 		KeyLock keyLock = null;
@@ -243,44 +244,20 @@ public class MaintenanceApi extends ApiscolApi {
 			keyLock.lock();
 			try {
 
-				searchEngineQueryHandler.deleteIndex();
-				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
-						.setDbType(DBTypes.mongoDB)
-						.setParameters(getDbConnexionParameters()).build();
-				resourceDataHandler.deleteAllDocuments();
-				ArrayList<String> resourceList = ResourceDirectoryInterface
-						.getResourcesList();
-				Iterator<String> it = resourceList.iterator();
-
-				while (it.hasNext()) {
-					String resourceId = it.next();
-					String serializedData = ResourceDirectoryInterface
-							.getSerializedData(resourceId);
-					logger.info("Restoring serialized data " + serializedData
-							+ "for resource " + resourceId);
-					resourceDataHandler.deserializeAndSaveToDataBase(
-							resourceId, serializedData);
-					ArrayList<File> files = ResourceDirectoryInterface
-							.getFileList(resourceId, true);
-					Iterator<File> it2 = files.iterator();
-					while (it2.hasNext()) {
-						String fileName = it2.next().getName();
-						searchEngineQueryHandler.processAddQueryForFile(
-								SolrJSearchEngineQueryHandler
-										.getDocumentIdentifier(resourceId,
-												fileName),
-								ResourceDirectoryInterface.getFilePath(
-										resourceId, fileName));
-						logger.info("Indexing file " + fileName
-								+ "for resource " + resourceId);
-						searchEngineQueryHandler.processCommitQuery();
-					}
-				}
-
+				logger.info("Entering critical section with mutual exclusion for all the content service");
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
 								MediaType.APPLICATION_ATOM_XML, context,
 								getDbConnexionParameters());
+				IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
+						.setDbType(DBTypes.mongoDB)
+						.setParameters(getDbConnexionParameters()).build();
+				State state = ContentRecoveryHandler.getInstance()
+						.getCurrentState();
+				if (state == State.INACTIVE) {
+					ContentRecoveryHandler.getInstance().startRecoveryProcess(
+							searchEngineQueryHandler, resourceDataHandler);
+				}
 			} finally {
 				keyLock.unlock();
 
@@ -293,7 +270,31 @@ public class MaintenanceApi extends ApiscolApi {
 					.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
 
-		return Response.ok().entity(rb.getSuccessfulGlobalDeletionReport())
+		return Response
+				.ok()
+
+				.entity(rb.getRecoveryProcedureRepresentation(getExternalUri(),
+						uriInfo, 0)).type(MediaType.APPLICATION_XML_TYPE)
+				.build();
+	}
+
+	@GET
+	@Path("/recovery")
+	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML })
+	public Response getRecoveryProcedureState(
+			@DefaultValue("10") @QueryParam(value = "nblines") final Integer nblines,
+			@Context HttpServletRequest request,
+			@Context ServletContext context, @Context UriInfo uriInfo)
+			throws SearchEngineErrorException,
+			SearchEngineCommunicationException, DBAccessException,
+			UnknownMediaTypeForResponseException {
+		IEntitiesRepresentationBuilder<?> rb = EntitiesRepresentationBuilderFactory
+				.getRepresentationBuilder(MediaType.APPLICATION_ATOM_XML,
+						context, getDbConnexionParameters());
+		return Response
+				.ok()
+				.entity(rb.getRecoveryProcedureRepresentation(getExternalUri(),
+						uriInfo, nblines)).type(MediaType.APPLICATION_XML_TYPE)
 				.build();
 	}
 

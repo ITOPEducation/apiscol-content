@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.common.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -37,6 +39,8 @@ import fr.ac_versailles.crdp.apiscol.content.databaseAccess.DBAccessBuilder.DBTy
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryInterface;
 import fr.ac_versailles.crdp.apiscol.content.fileSystemAccess.ResourceDirectoryNotFoundException;
+import fr.ac_versailles.crdp.apiscol.content.recovery.ContentRecoveryHandler;
+import fr.ac_versailles.crdp.apiscol.content.recovery.ContentRecoveryHandler.MessageTypes;
 import fr.ac_versailles.crdp.apiscol.content.searchEngine.ISearchEngineResultHandler;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
@@ -526,6 +530,24 @@ public class XMLRepresentationBuilder extends
 	}
 
 	@Override
+	public Document getSuccessfulRecoveryReport(URI baseUri, UriInfo uriInfo) {
+		Document report = XMLUtils.createXMLDocument();
+		Element rootElement = report.createElement("status");
+		Element stateElement = report.createElement("state");
+		stateElement.setTextContent("done");
+		Element linkElement = report.createElementNS(
+				UsedNamespaces.ATOM.getUri(), "link");
+		linkElement.setAttribute("href", baseUri + uriInfo.getPath());
+		Element messageElement = report.createElement("message");
+		messageElement.setTextContent("Resource repository has been restored");
+		rootElement.appendChild(stateElement);
+		rootElement.appendChild(linkElement);
+		rootElement.appendChild(messageElement);
+		report.appendChild(rootElement);
+		return report;
+	}
+
+	@Override
 	public Document getLinkUpdateProcedureRepresentation(URI baseUri,
 			UriInfo uriInfo) {
 		Document report = XMLUtils.createXMLDocument();
@@ -581,6 +603,105 @@ public class XMLRepresentationBuilder extends
 			rootElement.appendChild(errorsElement);
 		}
 		report.appendChild(rootElement);
+		return report;
+	}
+
+	@Override
+	public Document getRecoveryProcedureRepresentation(URI baseUri,
+			UriInfo uriInfo, Integer nbLines) {
+		Document report = XMLUtils.createXMLDocument();
+		Element rootElement = report.createElement("apiscol:status");
+		Element stateElement = report.createElement("apiscol:state");
+		String state = "";
+		ContentRecoveryHandler instance = ContentRecoveryHandler.getInstance();
+		switch (instance.getCurrentState()) {
+		case INACTIVE:
+			state = "inactive";
+			break;
+		case RECOVERY_RUNNING:
+			state = "recovery_running";
+			break;
+
+		}
+
+		stateElement.setTextContent(state);
+		Element linkElement = report.createElementNS(
+				UsedNamespaces.ATOM.getUri(), "link");
+		linkElement.setAttribute("href",
+				baseUri.toString() + "/" + uriInfo.getPath());
+		linkElement.setAttribute("rel", "self");
+		linkElement.setAttribute("type", "application/atom+xml");
+		rootElement.appendChild(stateElement);
+		rootElement.appendChild(linkElement);
+		LinkedList<Pair<String, MessageTypes>> originalMessages = instance
+				.getMessages();
+		if (originalMessages != null) {
+			@SuppressWarnings("unchecked")
+			LinkedList<Pair<String, MessageTypes>> messages = (LinkedList<Pair<String, MessageTypes>>) originalMessages
+					.clone();
+			Iterator<Pair<String, MessageTypes>> it = messages.iterator();
+			rootElement.appendChild(stateElement);
+			rootElement.appendChild(linkElement);
+			int counter = 0;
+			int start = 0;
+			if (nbLines > 0)
+				start = Math.max(0, messages.size() - nbLines);
+			while (it.hasNext()) {
+				counter++;
+				Pair<String, MessageTypes> message = it.next();
+				if (counter - 1 < start) {
+					continue;
+				}
+
+				Element messageElement = report
+						.createElement("apiscol:message");
+				messageElement.setAttribute("type", message.getValue()
+						.toString());
+				messageElement.setTextContent(message.getKey());
+				rootElement.appendChild(messageElement);
+
+			}
+		}
+
+		if (instance.getCurrentState() == ContentRecoveryHandler.State.RECOVERY_RUNNING) {
+			Element currentResourceElement = report
+					.createElement("apiscol:current_resource");
+			currentResourceElement.setTextContent(instance
+					.getCurrentlyProcessedResource());
+
+			rootElement.appendChild(currentResourceElement);
+		} else {
+			Element terminationElement = report
+					.createElement("apiscol:termination");
+			String termination = "";
+			switch (instance.getLastProcessTermination()) {
+			case SUCCESSFULL:
+				termination = "successful";
+				break;
+			case ABORTED:
+				termination = "aborted";
+				break;
+			case ERRORS:
+				termination = "errors";
+				break;
+			case NONE:
+				termination = "none";
+				break;
+			}
+			terminationElement.setTextContent(termination);
+			Element errorsElement = report.createElement("apiscol:errors");
+			errorsElement.setTextContent(String.valueOf(instance
+					.getLastProcessNumberOfErrors()));
+
+			rootElement.appendChild(terminationElement);
+			rootElement.appendChild(errorsElement);
+		}
+		Element processedElement = report.createElement("apiscol:processed");
+		processedElement.setTextContent(String.valueOf(instance
+				.getPercentageOfDocumentProcessed()));
+		rootElement.appendChild(processedElement);
+		report.appendChild(rootElement);
+		XMLUtils.addNameSpaces(report, UsedNamespaces.ATOM);
 		return report;
 	}
 

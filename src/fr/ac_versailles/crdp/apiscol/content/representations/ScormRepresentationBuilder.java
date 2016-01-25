@@ -221,4 +221,17 @@ public class ScormRepresentationBuilder extends
 		return null;
 	}
 
+	@Override
+	public Document getSuccessfulRecoveryReport(URI baseUri, UriInfo uriInfo) {
+		return null;
+	}
+
+	@Override
+	public Object getRecoveryProcedureRepresentation(URI externalUri,
+			UriInfo uriInfo, Integer nbLines)
+
+	{
+		return null;
+	}
+
 }

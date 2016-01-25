@@ -148,7 +148,18 @@ public class XHTMLRepresentationBuilder extends
 	public Object getRefreshProcessRepresentation(
 			Integer refreshProcessIdentifier, URI baseUri,
 			RefreshProcessRegistry refreshProcessRegistry) {
-		return null;
+		return "not yet implemented";
+	}
+
+	@Override
+	public String getSuccessfulRecoveryReport(URI baseUri, UriInfo uriInfo) {
+		return "not yet implemented";
+	}
+
+	@Override
+	public Object getRecoveryProcedureRepresentation(URI externalUri,
+			UriInfo uriInfo, Integer nbLines) {
+		return "not yet implemented";
 	}
 
 }
