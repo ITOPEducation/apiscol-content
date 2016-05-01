@@ -10,6 +10,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
+import fr.ac_versailles.crdp.apiscol.auth.oauth.OauthServersProxy;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 public class JerseySearchEngineQueryHandler implements
@@ -22,7 +23,8 @@ public class JerseySearchEngineQueryHandler implements
 	private static WebResource solrWebServiceExtractResource;
 
 	public JerseySearchEngineQueryHandler(String solrAddress,
-			String solrSearchPath, String solrUpdatePath, String solrExtractPath) {
+			String solrSearchPath, String solrUpdatePath,
+			String solrExtractPath, OauthServersProxy oauthServersProxy) {
 		client = Client.create();
 		solrWebServiceUpdateResource = client.resource(String.format("%s%s",
 				solrAddress, solrUpdatePath));
@@ -113,7 +115,7 @@ public class JerseySearchEngineQueryHandler implements
 
 	private void createLogger() {
 		if (logger == null)
-			logger  = LogUtility
+			logger = LogUtility
 					.createLogger(JerseySearchEngineQueryHandler.class
 							.getCanonicalName());
 

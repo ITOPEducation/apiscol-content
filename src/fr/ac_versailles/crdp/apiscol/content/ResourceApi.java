@@ -104,10 +104,12 @@ public class ResourceApi extends ApiscolApi {
 		if (!isInitialized) {
 			initializeStaticParameters();
 			initializeResourceDirectoryInterface();
+			fetchOauthServersProxy(context);
 			createSearchEngineQueryHandler();
 			createSearchEngineRequestExecutor();
 			createCompressionExecutor();
 			createPreviewMakerExecutor();
+			
 			isInitialized = true;
 		}
 	}
@@ -129,11 +131,11 @@ public class ResourceApi extends ApiscolApi {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		logger.warn("ApiScol content creates a new searchenginequery handler.");
+		getLogger().warn("ApiScol content creates a new searchenginequery handler.");
 
 		searchEngineQueryHandler = searchEngineFactory.getQueryHandler(
 				solrAddress, solrSearchPath, solrUpdatePath, solrExtractPath,
-				solrSuggestPath);
+				solrSuggestPath, oauthServersProxy);
 	}
 
 	private void initializeResourceDirectoryInterface() {
@@ -430,7 +432,7 @@ public class ResourceApi extends ApiscolApi {
 			String message = String
 					.format("A refresh request was sent for resource %s with all query parameters to false",
 							resourceId);
-			logger.warn(message);
+			getLogger().warn(message);
 			return Response.status(Response.Status.BAD_REQUEST).entity(message)
 					.build();
 		}
@@ -444,7 +446,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				logger.info(String
+				getLogger().info(String
 						.format("Entering critical section with mutual exclusion for resource %s",
 								resourceId));
 				if (!StringUtils.isEmpty(editUri))
@@ -484,7 +486,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -535,7 +537,7 @@ public class ResourceApi extends ApiscolApi {
 			String message = String
 					.format("A put request was sent for resource %s with all query parameters blank",
 							resourceId);
-			logger.warn(message);
+			getLogger().warn(message);
 			return Response.status(Response.Status.BAD_REQUEST).entity(message)
 					.build();
 		}
@@ -544,7 +546,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				logger.info(String
+				getLogger().info(String
 						.format("Entering critical section with mutual exclusion for resource %s",
 								resourceId));
 				if (!StringUtils.isEmpty(editUri))
@@ -559,7 +561,7 @@ public class ResourceApi extends ApiscolApi {
 						String message = String
 								.format("A put request was sent for resource %s with a mainFileName parameter %s but this resource is of type url",
 										resourceId, mainFileName);
-						logger.warn(message);
+						getLogger().warn(message);
 					} else {
 						if (ResourceDirectoryInterface.existsFile(resourceId,
 								mainFileName)) {
@@ -570,7 +572,7 @@ public class ResourceApi extends ApiscolApi {
 							String message = String
 									.format("A put request was sent for resource %s with a mainFileName %s parameter but this file is absent of the resource directory",
 											resourceId, mainFileName);
-							logger.warn(message);
+							getLogger().warn(message);
 							response = Response.status(422).entity(message);
 						}
 					}
@@ -613,17 +615,17 @@ public class ResourceApi extends ApiscolApi {
 									searchEngineQueryHandler
 											.processCommitQuery();
 								} catch (SearchEngineErrorException e) {
-									logger.error(String
+									getLogger().error(String
 											.format("A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
 													actualUrl, resourceId,
 													e.getMessage()));
 								} catch (SearchEngineCommunicationException e) {
-									logger.error(String
+									getLogger().error(String
 											.format("A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
 													actualUrl, resourceId,
 													e.getMessage()));
 								}
-								logger.info(String
+								getLogger().info(String
 										.format("Asking solr to remove from the index the actual url %s for resource %s.",
 												actualUrl, resourceId));
 							}
@@ -633,7 +635,7 @@ public class ResourceApi extends ApiscolApi {
 							String actualMainFile = resourceDataHandler
 									.getMainFileForResource(resourceId);
 							if (StringUtils.isNotBlank(actualMainFile)) {
-								logger.error(String
+								getLogger().error(String
 										.format("The actualMainField field in mongo contains %s value, but it should be blank because the resource %s is about to be converted into url type.",
 												actualMainFile, resourceId));
 							}
@@ -670,12 +672,12 @@ public class ResourceApi extends ApiscolApi {
 												.getDocumentIdentifier(
 														resourceId, actualUrl));
 							} catch (SearchEngineErrorException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
 												actualUrl, resourceId,
 												e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
 												actualUrl, resourceId,
 												e.getMessage()));
@@ -706,11 +708,11 @@ public class ResourceApi extends ApiscolApi {
 							try {
 								searchEngineQueryHandler.processCommitQuery();
 							} catch (SearchEngineErrorException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A search engine error occured while trying to commit search engine for resource index with message %s",
 												resourceId, e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A communication problem with search engine occured while trying to commit search engine for resource index with message %s",
 												resourceId, e.getMessage()));
 							}
@@ -720,7 +722,7 @@ public class ResourceApi extends ApiscolApi {
 						String message = String
 								.format("You cannot assign the url %s to the resource %s which is of content type %s",
 										url, resourceId, actualScormType);
-						logger.warn(message);
+						getLogger().warn(message);
 					}
 
 				}
@@ -772,7 +774,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -813,7 +815,7 @@ public class ResourceApi extends ApiscolApi {
 			String message = String
 					.format("A preview put request was sent for resource %s with image file name parameter blank",
 							resourceId);
-			logger.warn(message);
+			getLogger().warn(message);
 			return Response.status(Response.Status.BAD_REQUEST).entity(message)
 					.build();
 		}
@@ -822,7 +824,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				logger.info(String
+				getLogger().info(String
 						.format("Entering critical section with mutual exclusion for resource %s",
 								resourceId));
 				if (!StringUtils.isEmpty(editUri))
@@ -842,7 +844,7 @@ public class ResourceApi extends ApiscolApi {
 					String message = String
 							.format("A preview put request was sent for resource %s with an image file name %s parameter but this file is missing in the resource directory",
 									resourceId, imageFileName);
-					logger.warn(message);
+					getLogger().warn(message);
 					response = Response.status(422).entity(message);
 				}
 
@@ -865,7 +867,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -892,7 +894,7 @@ public class ResourceApi extends ApiscolApi {
 					TimeUtils.toRFC3339(Long.parseLong(storedEtag))))
 				throw new InvalidEtagException(providedEtag);
 		} catch (NumberFormatException e) {
-			logger.error(String.format("Stored etag %s is not a valid etag",
+			getLogger().error(String.format("Stored etag %s is not a valid etag",
 					storedEtag));
 		}
 	}
@@ -926,7 +928,7 @@ public class ResourceApi extends ApiscolApi {
 
 		UUID resourceId = UUID.randomUUID();
 		try {
-			logger.info(String
+			getLogger().info(String
 					.format("Entering critical section with mutual exclusion for resource %s",
 							resourceId));
 			keyLock = keyLockManager.getLock(resourceId.toString());
@@ -934,7 +936,7 @@ public class ResourceApi extends ApiscolApi {
 			try {
 				if (!StringUtils.isEmpty(editUri))
 					ResourceApi.editUri = editUri;
-				logger.info("Creating void resource with id : " + resourceId);
+				getLogger().info("Creating void resource with id : " + resourceId);
 				ResourceDirectoryInterface.createDirectory(resourceId);
 				resourceDataHandler.createResourceEntry(resourceId.toString());
 				// The method ContentType.convertStringToType will provide a
@@ -951,7 +953,7 @@ public class ResourceApi extends ApiscolApi {
 					String message = String
 							.format("Impossible to update scorm type and mdid of the resource %s that where just created",
 									resourceId);
-					logger.error(message);
+					getLogger().error(message);
 					throw new DBAccessException(message);
 				}
 			} finally {
@@ -961,7 +963,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -976,15 +978,15 @@ public class ResourceApi extends ApiscolApi {
 					ResourceApi.editUri);
 		} catch (InexistentResourceInDatabaseException e1) {
 			String message = String
-					.format("Impossible get the data of the resource %s that where just created",
+					.format("Impossible get the data of the resource %s that was just created",
 							resourceId);
-			logger.error(message);
+			getLogger().error(message);
 			throw new DBAccessException(message);
 		} catch (ResourceDirectoryNotFoundException e1) {
 			String message = String
-					.format("Impossible to find the directory of the resource %s that where just created",
+					.format("Impossible to find the directory of the resource %s that was just created",
 							resourceId);
-			logger.error(message);
+			getLogger().error(message);
 			throw new FileSystemAccessException(message);
 		}
 		try {
@@ -997,9 +999,9 @@ public class ResourceApi extends ApiscolApi {
 									resourceDataHandler)).build();
 		} catch (InexistentResourceInDatabaseException e) {
 			String message = String
-					.format("Impossible to get the version number of the resource %s that where just created",
+					.format("Impossible to get the version number of the resource %s that was just created",
 							resourceId);
-			logger.error(message);
+			getLogger().error(message);
 			throw new DBAccessException(message);
 		}
 	}
@@ -1060,7 +1062,7 @@ public class ResourceApi extends ApiscolApi {
 		KeyLock keyLock = null;
 
 		try {
-			logger.info(String
+			getLogger().info(String
 					.format("Entering critical section with mutual exclusion for resource %s",
 							resourceId));
 			keyLock = keyLockManager.getLock(resourceId.toString());
@@ -1090,11 +1092,11 @@ public class ResourceApi extends ApiscolApi {
 										resourceId, fileName));
 						searchEngineQueryHandler.processCommitQuery();
 					} catch (SearchEngineErrorException e) {
-						logger.error(String
+						getLogger().error(String
 								.format("A search engine error occured while trying to add file %s for resource %s from search engine index with message %s",
 										fileName, resourceId, e.getMessage()));
 					} catch (SearchEngineCommunicationException e) {
-						logger.error(String
+						getLogger().error(String
 								.format("A communication problem with search engine occured while trying to add file %s for resource %s from search engine index with message %s",
 										fileName, resourceId, e.getMessage()));
 					}
@@ -1128,7 +1130,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -1167,7 +1169,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				logger.info(String
+				getLogger().info(String
 						.format("Entering critical section with mutual exclusion for resource %s",
 								resourceId));
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
@@ -1198,11 +1200,11 @@ public class ResourceApi extends ApiscolApi {
 											resourceId, fileName));
 					searchEngineQueryHandler.processCommitQuery();
 				} catch (SearchEngineErrorException e) {
-					logger.error(String
+					getLogger().error(String
 							.format("A search engine error occured while trying to add file %s for resource %s from search engine index with message %s",
 									fileName, resourceId, e.getMessage()));
 				} catch (SearchEngineCommunicationException e) {
-					logger.error(String
+					getLogger().error(String
 							.format("A communication problem with search engine occured while trying to add file %s for resource %s from search engine index with message %s",
 									fileName, resourceId, e.getMessage()));
 				}
@@ -1225,7 +1227,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -1379,7 +1381,7 @@ public class ResourceApi extends ApiscolApi {
 			try {
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
 						resourceDataHandler.getEtagForResource(resourceId));
-				logger.info(String
+				getLogger().info(String
 						.format("Entering critical section with mutual exclusion for resource %s",
 								resourceId));
 				if (!ResourceDirectoryInterface
@@ -1387,10 +1389,10 @@ public class ResourceApi extends ApiscolApi {
 					Object message = String
 							.format("An attempt was made to add file %s but directory was not found for the resource %s",
 									fileName, resourceId);
-					logger.error(message);
+					getLogger().error(message);
 					response = Response.status(404).entity(message);
 				} else {
-					logger.info(String
+					getLogger().info(String
 							.format("The directory for the resource %s has been found on the file system",
 									resourceId));
 					String scormType = null;
@@ -1398,7 +1400,7 @@ public class ResourceApi extends ApiscolApi {
 						scormType = resourceDataHandler
 								.getScormTypeForResource(resourceId);
 					} catch (InexistentResourceInDatabaseException e) {
-						logger.info(String
+						getLogger().info(String
 								.format("No entry was found in the database for resource %s, trying to create a default one",
 										resourceId));
 						resourceDataHandler.createResourceEntry(resourceId,
@@ -1408,7 +1410,7 @@ public class ResourceApi extends ApiscolApi {
 						String message = String
 								.format("Impossible to delete the file %s for the resource %s, the ressource is of the wrong type (url), it has nos files.",
 										fileName, resourceId);
-						logger.warn(message);
+						getLogger().warn(message);
 						response = Response.status(422).entity(message);
 					} else {
 						String decodedFileName = null;
@@ -1422,7 +1424,7 @@ public class ResourceApi extends ApiscolApi {
 						Boolean success = ResourceDirectoryInterface
 								.deleteFile(resourceId, decodedFileName);
 						if (success) {
-							logger.info(String
+							getLogger().info(String
 									.format("Successfully deleted the file %s for the resource %s",
 											decodedFileName, resourceId));
 							try {
@@ -1433,12 +1435,12 @@ public class ResourceApi extends ApiscolApi {
 														decodedFileName));
 								searchEngineQueryHandler.processCommitQuery();
 							} catch (SearchEngineErrorException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
 												decodedFileName, resourceId,
 												e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
 												decodedFileName, resourceId,
 												e.getMessage()));
@@ -1454,7 +1456,7 @@ public class ResourceApi extends ApiscolApi {
 								resourceDataHandler
 										.updateVersionNumber(resourceId);
 							} catch (InexistentResourceInDatabaseException e) {
-								logger.info(String
+								getLogger().info(String
 										.format("No entry was found in the database for resource %s, trying to create a default one",
 												resourceId));
 								resourceDataHandler.createResourceEntry(
@@ -1481,20 +1483,20 @@ public class ResourceApi extends ApiscolApi {
 									String errorReport = String
 											.format("Resource %s doesn't contains any file more but it was impossible to delete his archive",
 													resourceId);
-									logger.error(errorReport);
+									getLogger().error(errorReport);
 								}
 							} else if (updateArchive)
 								updateResourceDownloadableArchive(resourceId,
 										request);
 
 						} else {
-							logger.warn(String
+							getLogger().warn(String
 									.format("Failed to delete the file %s for the resource %s",
 											fileName, resourceId));
 							Boolean exists = ResourceDirectoryInterface
 									.existsFile(resourceId, fileName);
 							if (exists) {
-								logger.error(String
+								getLogger().error(String
 										.format("The file %s for the resource %s seems to exists, check permissions",
 												fileName, resourceId));
 
@@ -1502,7 +1504,7 @@ public class ResourceApi extends ApiscolApi {
 										.serverError()
 										.entity("Impossible to  destroy the file. Thre may be a unix permissions problem.");
 							} else {
-								logger.warn(String
+								getLogger().warn(String
 										.format("Deletion of the file %s for the resource %s has been requested but it does not exist",
 												fileName, resourceId));
 								try {
@@ -1514,18 +1516,18 @@ public class ResourceApi extends ApiscolApi {
 									searchEngineQueryHandler
 											.processCommitQuery();
 								} catch (SearchEngineErrorException e) {
-									logger.error(String
+									getLogger().error(String
 											.format("A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
 													fileName, resourceId,
 													e.getMessage()));
 								} catch (SearchEngineCommunicationException e) {
-									logger.error(String
+									getLogger().error(String
 											.format("A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
 													fileName, resourceId,
 													e.getMessage()));
 								}
 
-								logger.warn(String
+								getLogger().warn(String
 										.format("For consistency reason, the file %s of the resource %s will be removed from the search engine index",
 												fileName, resourceId));
 								response = Response
@@ -1554,7 +1556,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -1567,7 +1569,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(KeyLockManager.GLOBAL_LOCK_KEY);
 			keyLock.lock();
 			try {
-				logger.info(String
+				getLogger().info(String
 						.format("Passing through mutual exclusion for all the content service"));
 			} finally {
 				keyLock.unlock();
@@ -1604,7 +1606,7 @@ public class ResourceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(resourceId.toString());
 			keyLock.lock();
 			try {
-				logger.info(String
+				getLogger().info(String
 						.format("Entering critical section with mutual exclusion for resource %s",
 								resourceId));
 				checkFreshness(request.getHeader(HttpHeaders.IF_MATCH),
@@ -1629,7 +1631,7 @@ public class ResourceApi extends ApiscolApi {
 							.format("No entry was found in the database for resource %s to be deleted",
 									resourceId);
 					warnings.append(errorReport);
-					logger.error(errorReport);
+					getLogger().error(errorReport);
 				}
 				// url and scormtype may be undefined at this stage
 				// now try to delete the resource directory
@@ -1642,7 +1644,7 @@ public class ResourceApi extends ApiscolApi {
 						files = ResourceDirectoryInterface.getFileNamesList(
 								resourceId, false);
 					} catch (ResourceDirectoryNotFoundException e1) {
-						logger.error("Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
+						getLogger().error("Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
 						throw e1;
 					}
 					Boolean successfullFileCollectionDelection = true;
@@ -1662,7 +1664,7 @@ public class ResourceApi extends ApiscolApi {
 							String warning = String
 									.format("The file %s is a temporary file, it should not remain in the %s directory. It while be deleted anyway.",
 											fileName, resourceId);
-							logger.warn(warning);
+							getLogger().warn(warning);
 							warnings.append(warning);
 						}
 						// try to delete the file from filesystem
@@ -1670,25 +1672,25 @@ public class ResourceApi extends ApiscolApi {
 							successFullFileDeletion = ResourceDirectoryInterface
 									.deleteFile(resourceId, fileName);
 						} catch (ResourceDirectoryNotFoundException e) {
-							logger.error("Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
+							getLogger().error("Incoherent situation. File exists but ResourceDirectoryNotFoundException has trigerred");
 							throw e;
 						}
 
 						if (successFullFileDeletion) {
-							logger.info(String
+							getLogger().info(String
 									.format("Successfully deleted the file %s for the resource %s",
 											fileName, resourceId));
 						} else {
 							String errorReport = "Failed to delete the file %s for the resource %s";
 							warnings.append(errorReport);
-							logger.warn(String.format(errorReport, fileName,
+							getLogger().warn(String.format(errorReport, fileName,
 									resourceId));
 							Boolean exists = ResourceDirectoryInterface
 									.existsFile(resourceId, fileName);
 							if (exists) {
 								String errorReport1 = "The file %s for the resource %s seems to exists, check permissions";
 								warnings.append(errorReport1);
-								logger.error(String.format(errorReport1,
+								getLogger().error(String.format(errorReport1,
 										fileName, resourceId));
 
 							} else {
@@ -1696,7 +1698,7 @@ public class ResourceApi extends ApiscolApi {
 										.format("Deletion of the file %s for the resource %s has been requested but it is not accessible",
 												fileName, resourceId);
 								warnings.append(errorReport2);
-								logger.warn(errorReport2);
+								getLogger().warn(errorReport2);
 							}
 							throw new FileSystemAccessException(
 									warnings.toString());
@@ -1712,12 +1714,12 @@ public class ResourceApi extends ApiscolApi {
 												.getDocumentIdentifier(
 														resourceId, fileName));
 							} catch (SearchEngineErrorException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A search engine error occured while trying to remove file %s for resource %s from search engine index with message %s",
 												fileName, resourceId,
 												e.getMessage()));
 							} catch (SearchEngineCommunicationException e) {
-								logger.error(String
+								getLogger().error(String
 										.format("A communication problem with search engine occured while trying to remove file %s for resource %s from search engine index with message %s",
 												fileName, resourceId,
 												e.getMessage()));
@@ -1731,7 +1733,7 @@ public class ResourceApi extends ApiscolApi {
 								.existResourceArchive(resourceId)) {
 							if (!ResourceDirectoryInterface
 									.deleteResourceArchive(resourceId))
-								logger.warn(String
+								getLogger().warn(String
 										.format("Failed to delete archive for resource %s",
 												resourceId));
 
@@ -1755,7 +1757,7 @@ public class ResourceApi extends ApiscolApi {
 											.format("The resource %s to be deleted has scorm type %s but his entry in database contains the non blank url %s",
 													resourceId, scormType, url);
 									// we will only log a warning
-									logger.warn(errorReport);
+									getLogger().warn(errorReport);
 									warnings.append(errorReport);
 								}
 								// ask Solr to delete this url from index
@@ -1765,12 +1767,12 @@ public class ResourceApi extends ApiscolApi {
 													.getDocumentIdentifier(
 															resourceId, url));
 								} catch (SearchEngineErrorException e) {
-									logger.error(String
+									getLogger().error(String
 											.format("A search engine error occured while trying to remove url %s for resource %s from search engine index with message %s",
 													url, resourceId,
 													e.getMessage()));
 								} catch (SearchEngineCommunicationException e) {
-									logger.error(String
+									getLogger().error(String
 											.format("A communication problem with search engine occured while trying to remove url %s for resource %s from search engine index with message %s",
 													url, resourceId,
 													e.getMessage()));
@@ -1791,7 +1793,7 @@ public class ResourceApi extends ApiscolApi {
 								"Failed to delete directory for resource %s",
 								resourceId);
 						warnings.append(errorReport);
-						logger.error(errorReport);
+						getLogger().error(errorReport);
 						// directory exists but we were unable to delete it
 						if (response == null)
 							response = Response
@@ -1805,7 +1807,7 @@ public class ResourceApi extends ApiscolApi {
 							.format("An attempt was made to delete the resource %s but no directory was found for it",
 									resourceId);
 					warnings.append(message);
-					logger.error(message);
+					getLogger().error(message);
 					// if we did'nt find an entry in database, neither a
 					// directory, this resource has
 					// never existed
@@ -1824,12 +1826,12 @@ public class ResourceApi extends ApiscolApi {
 					try {
 						searchEngineQueryHandler.processCommitQuery();
 					} catch (SearchEngineErrorException e) {
-						logger.error(String
+						getLogger().error(String
 								.format("A search engine error occured while trying to commit to search engine index with message %s",
 
 								e.getMessage()));
 					} catch (SearchEngineCommunicationException e) {
-						logger.error(String
+						getLogger().error(String
 								.format("A communication problem with search engine occured while trying to commit to search engine index from search engine index with message %s",
 										e.getMessage()));
 					}
@@ -1855,7 +1857,7 @@ public class ResourceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
+			getLogger().info(String
 					.format("Leaving critical section with mutual exclusion for resource %s",
 							resourceId));
 		}
@@ -1866,7 +1868,7 @@ public class ResourceApi extends ApiscolApi {
 
 	private void deleteResourceDownloadableArchive(String resourceId) {
 		if (!ResourceDirectoryInterface.deleteResourceArchive(resourceId))
-			logger.error(String.format(
+			getLogger().error(String.format(
 					"Unable to delete archive directory for resource %s",
 					resourceId));
 
@@ -1902,12 +1904,12 @@ public class ResourceApi extends ApiscolApi {
 		IResourceDataHandler resourceDataHandler = new DBAccessBuilder()
 				.setDbType(DBTypes.mongoDB)
 				.setParameters(getDbConnexionParameters()).build();
-		logger.info("> Asking for thumb list, file : " + requestedFormat
+		getLogger().info("> Asking for thumb list, file : " + requestedFormat
 				+ " , resource id : " + resourceId + " , scorm type :"
 				+ resourceDataHandler.getScormTypeForResource(resourceId));
 		ThumbExtracter thumbsExtracter = ThumbExtracterFactory.getExtracter(
 				resourceDataHandler, resourceId);
-		logger.info("Thumbextracter : " + thumbsExtracter.getClass().getName());
+		getLogger().info("Thumbextracter : " + thumbsExtracter.getClass().getName());
 		Map<String, Point> thumbsUris = thumbsExtracter.getThumbsFromResource(
 				resourceId, resourceDataHandler,
 				ResourcesKeySyntax.removeSSL(getExternalUri().toString()),
@@ -1923,8 +1925,8 @@ public class ResourceApi extends ApiscolApi {
 	}
 
 	public static void stopExecutors() {
-		if (logger != null)
-			logger.info("Thread executors are going to be stopped for Apiscol Content.");
+		if (getLogger() != null)
+			getLogger().info("Thread executors are going to be stopped for Apiscol Content.");
 		if (compressionExecutor != null)
 			compressionExecutor.shutdown();
 		if (previewMakerExecutor != null)

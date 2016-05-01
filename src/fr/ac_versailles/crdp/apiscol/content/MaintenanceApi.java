@@ -1,9 +1,5 @@
 package fr.ac_versailles.crdp.apiscol.content;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
@@ -38,7 +34,6 @@ import fr.ac_versailles.crdp.apiscol.content.searchEngine.ISearchEngineFactory;
 import fr.ac_versailles.crdp.apiscol.content.searchEngine.ISearchEngineQueryHandler;
 import fr.ac_versailles.crdp.apiscol.content.searchEngine.SearchEngineCommunicationException;
 import fr.ac_versailles.crdp.apiscol.content.searchEngine.SearchEngineErrorException;
-import fr.ac_versailles.crdp.apiscol.content.searchEngine.SolrJSearchEngineQueryHandler;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
 import fr.ac_versailles.crdp.apiscol.transactions.KeyLock;
@@ -55,6 +50,7 @@ public class MaintenanceApi extends ApiscolApi {
 		super(context);
 		if (!isInitialized) {
 			initializeResourceDirectoryInterface(context);
+			fetchOauthServersProxy(context);
 			createSearchEngineQueryHandler(context);
 			isInitialized = true;
 		}
@@ -79,7 +75,7 @@ public class MaintenanceApi extends ApiscolApi {
 		}
 		searchEngineQueryHandler = searchEngineFactory.getQueryHandler(
 				solrAddress, solrSearchPath, solrUpdatePath, solrExtractPath,
-				solrSuggestPath);
+				solrSuggestPath, oauthServersProxy);
 	}
 
 	private void initializeResourceDirectoryInterface(ServletContext context) {
@@ -139,7 +135,8 @@ public class MaintenanceApi extends ApiscolApi {
 			keyLock = keyLockManager.getLock(KeyLockManager.GLOBAL_LOCK_KEY);
 			keyLock.lock();
 			try {
-				logger.info("Entering critical section with mutual exclusion for all the content service");
+				getLogger()
+						.info("Entering critical section with mutual exclusion for all the content service");
 				String requestedFormat = guessRequestedFormat(request, format);
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(requestedFormat, context,
@@ -160,8 +157,9 @@ public class MaintenanceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
-					.format("Leaving critical section with mutual exclusion for all the content service"));
+			getLogger()
+					.info(String
+							.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
 		return Response
 				.ok()
@@ -223,8 +221,9 @@ public class MaintenanceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
-					.format("Leaving critical section with mutual exclusion for all the content service"));
+			getLogger()
+					.info(String
+							.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
 
 		return Response.ok().entity(rb.getSuccessfulGlobalDeletionReport())
@@ -244,7 +243,8 @@ public class MaintenanceApi extends ApiscolApi {
 			keyLock.lock();
 			try {
 
-				logger.info("Entering critical section with mutual exclusion for all the content service");
+				getLogger()
+						.info("Entering critical section with mutual exclusion for all the content service");
 				rb = EntitiesRepresentationBuilderFactory
 						.getRepresentationBuilder(
 								MediaType.APPLICATION_ATOM_XML, context,
@@ -266,8 +266,9 @@ public class MaintenanceApi extends ApiscolApi {
 			if (keyLock != null) {
 				keyLock.release();
 			}
-			logger.info(String
-					.format("Leaving critical section with mutual exclusion for all the content service"));
+			getLogger()
+					.info(String
+							.format("Leaving critical section with mutual exclusion for all the content service"));
 		}
 
 		return Response

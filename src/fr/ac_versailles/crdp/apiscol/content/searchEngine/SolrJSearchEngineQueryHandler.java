@@ -18,6 +18,8 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.ContentStreamBase;
 import org.apache.solr.common.util.NamedList;
 
+import fr.ac_versailles.crdp.apiscol.auth.oauth.OAuthException;
+import fr.ac_versailles.crdp.apiscol.auth.oauth.OauthServersProxy;
 import fr.ac_versailles.crdp.apiscol.utils.LogUtility;
 
 public class SolrJSearchEngineQueryHandler implements ISearchEngineQueryHandler {
@@ -28,14 +30,17 @@ public class SolrJSearchEngineQueryHandler implements ISearchEngineQueryHandler 
 	private final String solrExtractPath;
 	private HttpSolrServer solr;
 	private static Logger logger;
+	private OauthServersProxy oauthServersProxy;
 
 	public SolrJSearchEngineQueryHandler(String solrAddress,
 			String solrSearchPath, String solrUpdatePath,
-			String solrExtractPath, String solrSuggestPath) {
+			String solrExtractPath, String solrSuggestPath,
+			OauthServersProxy oauthServersProxy) {
 		this.solrSearchPath = solrSearchPath;
 		this.solrUpdatePath = solrUpdatePath;
 		this.solrExtractPath = solrExtractPath;
 		this.solrSuggestPath = solrSuggestPath;
+		this.oauthServersProxy = oauthServersProxy;
 		solr = new HttpSolrServer(solrAddress);
 		solr.setParser(new XMLResponseParser());
 	}
@@ -170,7 +175,25 @@ public class SolrJSearchEngineQueryHandler implements ISearchEngineQueryHandler 
 				String.format("%s%s", solrUpdatePath, solrExtractPath));
 		createLogger();
 		try {
-			req.addContentStream(new ContentStreamBase.URLStream(new URL(url)));
+			String accessToken = null;
+			if (oauthServersProxy != null) {
+				try {
+					accessToken = oauthServersProxy.getAccesTokenForUrl(url);
+				} catch (OAuthException e) {
+					logger.error("Access token request failure : "
+							+ e.getMessage());
+				}
+			}
+			if (accessToken == null) {
+				req.addContentStream(new ContentStreamBase.URLStream(new URL(
+						url)));
+			} else {
+				logger.info("Solrj will parse resource at url " + url
+						+ " with access token : " + accessToken);
+				req.addContentStream(new OAuthProtectedContentStreamBase.OAuthURLStream(
+						new URL(url), accessToken));
+			}
+
 		} catch (MalformedURLException e1) {
 			throw new UrlBadSyntaxException(url);
 		}
