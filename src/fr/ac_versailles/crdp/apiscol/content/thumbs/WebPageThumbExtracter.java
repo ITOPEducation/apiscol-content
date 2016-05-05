@@ -11,11 +11,13 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import fr.ac_versailles.crdp.apiscol.auth.oauth.OAuthException;
 import fr.ac_versailles.crdp.apiscol.content.databaseAccess.IResourceDataHandler;
 import fr.ac_versailles.crdp.apiscol.database.DBAccessException;
 import fr.ac_versailles.crdp.apiscol.database.InexistentResourceInDatabaseException;
@@ -40,8 +42,23 @@ public class WebPageThumbExtracter extends AbstractThumbExtracter {
 			return new HashMap<String, Point>();
 		}
 		Document doc = null;
+		String accessToken = null;
+		if (oauthServersProxy != null) {
+			try {
+				accessToken = oauthServersProxy.getAccesTokenForUrl(url);
+			} catch (OAuthException e) {
+				logger.error("Oauth authorization request failure : "
+						+ e.getMessage());
+			}
+		}
 		try {
-			doc = Jsoup.connect(url).get();
+			Connection connection = Jsoup.connect(url);
+			if (StringUtils.isNotEmpty(accessToken)) {
+				connection.header("Authorization", "Bearer " + accessToken);
+				logger.info("Jsoup is using the following access token for thumb extraction : "
+						+ accessToken);
+			}
+			doc = connection.get();
 		} catch (Exception e) {
 			logger.warn(String
 					.format("This is not a valid url for thumb extraction for resource %s in content web service : %s",

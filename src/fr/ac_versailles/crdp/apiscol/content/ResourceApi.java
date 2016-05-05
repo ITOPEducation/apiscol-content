@@ -1907,6 +1907,7 @@ public class ResourceApi extends ApiscolApi {
 		getLogger().info("> Asking for thumb list, file : " + requestedFormat
 				+ " , resource id : " + resourceId + " , scorm type :"
 				+ resourceDataHandler.getScormTypeForResource(resourceId));
+		ThumbExtracterFactory.setOAuthServersProxy(oauthServersProxy);
 		ThumbExtracter thumbsExtracter = ThumbExtracterFactory.getExtracter(
 				resourceDataHandler, resourceId);
 		getLogger().info("Thumbextracter : " + thumbsExtracter.getClass().getName());
