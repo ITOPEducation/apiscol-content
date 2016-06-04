@@ -21,6 +21,8 @@ import fr.ac_versailles.crdp.apiscol.database.MongoUtils;
 
 public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 
+	private Map<String, DBObject> resources = new HashMap<String, DBObject>();
+
 	public enum DBKeys {
 		id("_id"), mainFile("main"), type("type"), metadata("metadata"), url(
 				"url"), etag("etag"), deadLink("dead_link");
@@ -98,6 +100,9 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 
 	private DBObject getResourceById(String resourceId)
 			throws InexistentResourceInDatabaseException, DBAccessException {
+		if (resources.containsKey(resourceId)) {
+			return resources.get(resourceId);
+		}
 		BasicDBObject query = new BasicDBObject();
 		query.put(DBKeys.id.toString(), resourceId);
 		DBObject resource = null;
@@ -119,6 +124,7 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 							"Asked content database for resource %s. But there is no entry for this resource. Your data must be in inconsistent state.",
 							resourceId));
 		}
+		resources.put(resourceId, resource);
 		return resource;
 
 	}
@@ -318,14 +324,11 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 				return;
 			}
 		}
-		if (StringUtils.isBlank(url))
-			{
+		if (StringUtils.isBlank(url)) {
 			resource.removeField(DBKeys.url.toString());
-			}
-		else
-			{
+		} else {
 			resource.put(DBKeys.url.toString(), url);
-			}
+		}
 		try {
 			saveAndUpdateLastModified(resource);
 		} catch (MongoException e) {
@@ -459,7 +462,7 @@ public class MongoResourceDataHandler extends AbstractResourcesDataHandler {
 	public String getResourceIdByMetadataId(String metadataId)
 			throws DBAccessException, InexistentResourceInDatabaseException {
 		BasicDBObject query = new BasicDBObject();
-		String idPart = metadataId.substring(metadataId.lastIndexOf('/')+1);
+		String idPart = metadataId.substring(metadataId.lastIndexOf('/') + 1);
 		query.put(DBKeys.metadata.toString(), new BasicDBObject("$regex",
 				String.format(".*%s$", idPart)));
 		DBObject resource = null;
