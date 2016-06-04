@@ -19,7 +19,7 @@ public class ThumbExtracterFactory {
 			return new FileThumbExtracter();
 		else {
 			String url = resourceDataHandler.getUrlForResource(resourceId);
-			if (url.toLowerCase().endsWith(".pdf")) {
+			if (url!=null && url.toLowerCase().endsWith(".pdf")) {
 				RemotePdfThumbExtracter remotePdfThumbExtracter = new RemotePdfThumbExtracter();
 				if (oauthServersProxy != null) {
 					remotePdfThumbExtracter
