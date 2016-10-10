@@ -6,8 +6,8 @@ public class TikaLanguageDetector extends AbstractLanguageDetector {
 
 	@Override
 	public String detectLanguage(String texte) {
-		return new LanguageIdentifier(texte).getLanguage();
+		String iso639_1 = new LanguageIdentifier(texte).getLanguage();
+		return Iso639Converter.getIso639_2(iso639_1);
 	}
-
 
 }
